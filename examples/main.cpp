@@ -20,8 +20,9 @@ int main(int argc, char const* argv[])
   auto p2 = F::placeholder("p2", s, d2, ctx);
   auto add = F::add("add1", p1, p2, ctx);
 
-  auto v = new PrintVisitor();
-  add->accept(v);
+  print_tensor(p1->tensor());
+  // auto v = new PrintVisitort();
+  // add->accept(v);
 
   // auto input = dnn::make_tensor(1, 28, 28, 1);
 

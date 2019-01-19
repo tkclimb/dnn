@@ -3,6 +3,7 @@
 #include <cinttypes>
 #include <cstdlib>
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <numeric>
 #include <vector>
@@ -57,7 +58,7 @@ public:
 
   inline Shape shape() const { return shape_; }
 
-  inline Index size() const { return shape_.size(); }
+  inline Index rank() const { return shape_.size(); }
 
   inline Index elems() const { return calc_elems(shape_); }
 
@@ -90,5 +91,8 @@ private:
     return ext;
   }
 };
+
+void print_tensor(const Tensor&);
+Index print_tensor(const Tensor&, Index, Index);
 
 } // namespace dnn

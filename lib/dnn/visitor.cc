@@ -32,6 +32,8 @@ void PrintVisitor::visit_pre(const Placeholder*) {}
 void PrintVisitor::visit_post(const Placeholder* x)
 {
   cout << "Placeholder[" << x->name() << "]" << endl;
+  // for (size_t dim = 0; dim < x->tensor().rank(); dim++) {}
+  // cout << "{"
 }
 
 void PrintVisitor::visit_pre(const Add*) {}
