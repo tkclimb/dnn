@@ -1,0 +1,10 @@
+# for common name of build directory
+build/
+
+# vscode
+.vscode/
+
+# git submodules
+thirdparty/*
+!thirdparty/CMakeLists.txt
+
