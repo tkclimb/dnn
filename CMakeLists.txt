@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.7)
 project(dnn CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CXX_STANDARD_REQUirED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -43,13 +43,12 @@ get_filename_component(DNN_LIB_DIR lib ABSOLUTE)
 get_filename_component(DNN_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR} ABSOLUTE)
 get_filename_component(DNN_BUILD_LIB_DIR ${DNN_BUILD_DIR}/lib ABSOLUTE)
 get_filename_component(DNN_BUILD_DIR ${DNN_BUILD_DNN_DIR}/lib/dnn ABSOLUTE)
-get_filename_component(DNN_BUILD_THIRDPARTY_DIR ${DNN_BUILD_DIR}/THIRDParty ABSOLUTE)
+get_filename_component(DNN_BUILD_THIRDPARTY_DIR ${DNN_BUILD_DIR}/thirdparty ABSOLUTE)
 get_filename_component(DNN_BUILD_TESTS_DIR ${DNN_BUILD_DIR}/tests ABSOLUTE)
+# thirdparty direcotries
+get_filename_component(DNN_THIRDPARTY_GTEST_DIR ${DNN_THIRDPARTY_DIR}/googletest ABSOLUTE)
+get_filename_component(DNN_THIRDPARTY_EIGEN_DIR ${DNN_THIRDPARTY_DIR}/eigen ABSOLUTE)
 
-
-# Build thirdparty first
-add_subdirectory(${DNN_THIRDPARTY_DIR})
-get_filename_component(DNN_EIGEN_DIR ${DNN_THIRDPARTY_DIR}/eigen ABSOLUTE)
 
 list(APPEND CMAKE_MODULE_PATH ${DNN_ROOT_DIR}/cmake)
 include(default_config)
@@ -62,7 +61,7 @@ endif()
 
 include_directories(BEFORE
   ${DNN_LIB_DIR}
-  ${DNN_EIGEN_DIR}
+  ${DNN_THIRDPARTY_EIGEN_DIR}
 )
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${DNN_BUILD_LIB_DIR})
@@ -78,5 +77,6 @@ endif()
 
 if (BUILD_TESTS)
   enable_testing()
+  add_subdirectory(${DNN_THIRDPARTY_GTEST_DIR})
   add_subdirectory(${DNN_TESTS_DIR})
 endif()

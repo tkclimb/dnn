@@ -1,0 +1,2 @@
+add_library(dnn_backend generic.cc)
+ 

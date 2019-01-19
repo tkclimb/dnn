@@ -8,4 +8,10 @@ using Index = std::uint32_t;
 using Shape = std::vector<Index>;
 using Data = std::vector<DEFAULT_DTYPE>;
 
+enum class NodeTy
+{
+  Placeholder,
+  Add,
+};
+
 } // namespace dnn

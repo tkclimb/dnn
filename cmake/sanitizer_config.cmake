@@ -2,7 +2,8 @@ set(USE_SANITIZER "" CACHE STRING
     "Define the sanitizer to build binaries and tests.")
 
 if(USE_SANITIZER)
-  set_property(GLOBAL PROPERTY "-fno-omit-frame-pointer -O1 -fsanitize=address -fsanitize=memory -fsanitize=leak")
+  set_property(GLOBAL PROPERTY -fno-omit-frame-pointer -O1 -fsanitize=address -fsanitize=leak)
+  link_libraries(-fsanitize=address -fsanitize=leak)
 endif()
 
 # if(USE_SANITIZER)

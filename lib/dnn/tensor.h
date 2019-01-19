@@ -1,6 +1,7 @@
 #pragma once
 #include <cassert>
 #include <cinttypes>
+#include <cstdlib>
 #include <functional>
 #include <memory>
 #include <numeric>
@@ -21,31 +22,18 @@ private:
   Shape extents_ = {1};
   T* data_ = nullptr;
 
-  const void free() const { std::free(data_); }
-
-  inline const Index calc_elems(const Shape& shape) const noexcept
-  {
-    return std::accumulate(shape.begin(), shape.end(), 1,
-                           std::multiplies<Index>());
-  }
-
-  Shape derive_extents(const Shape& shape) const
-  {
-    Shape ext(shape.size());
-    size_t cur_ext = 1;
-    for (int i = shape.size() - 1; i >= 0; --i) {
-      ext[i] = cur_ext;
-      cur_ext *= shape[i];
-    }
-    return ext;
-  }
-
 public:
-  Tensor(const Shape& shape) : shape_{shape}, extents_{derive_extents(shape)} {}
+  Tensor(const Shape& shape)
+    : shape_{shape}
+    , extents_{derive_extents(shape)}
+    , data_{reinterpret_cast<T*>(std::malloc(elems() * sizeof(T)))}
+  {}
+
   Tensor(const Shape& shape, const Data& data) : Tensor(shape)
   {
     copy_from_vec(data);
   }
+
   virtual ~Tensor() { free(); };
 
   Tensor(Tensor&) = default;
@@ -67,11 +55,11 @@ public:
 
   T* data() { return data_; }
 
-  Shape shape() const { return shape_; }
+  inline Shape shape() const { return shape_; }
 
-  Index size() const { return shape_.size(); }
+  inline Index size() const { return shape_.size(); }
 
-  Index elems() const { return calc_elems(shape_); }
+  inline Index elems() const { return calc_elems(shape_); }
 
   inline T operator[](const Index idx) const noexcept { return data_[idx]; }
 
@@ -80,6 +68,26 @@ public:
     size_t idx =
       std::inner_product(extents_.begin(), extents_.end(), idxs.begin(), 0);
     return (*this)[idx];
+  }
+
+private:
+  const void free() const { std::free(data_); }
+
+  inline const Index calc_elems(const Shape& shape) const noexcept
+  {
+    return std::accumulate(shape.begin(), shape.end(), 1,
+                           std::multiplies<Index>());
+  }
+
+  Shape derive_extents(const Shape& shape) const
+  {
+    Shape ext(shape.size());
+    size_t cur_ext = 1;
+    for (int i = shape.size() - 1; i >= 0; --i) {
+      ext[i] = cur_ext;
+      cur_ext *= shape[i];
+    }
+    return ext;
   }
 };
 
