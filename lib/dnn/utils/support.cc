@@ -5,32 +5,38 @@
 
 namespace dnn {
 
+#define NODETYPE_STR(NODETY) #NODETY
+
+#define RETURN_NODETYPE_STR(NODE)      \
+  case NodeTy::NODE:                   \
+    return NODETYPE_STR(NodeTy::NODE); \
+    break;
+
 std::string to_string(const NodeTy& ntype)
 {
   switch (ntype) {
-    case NodeTy::Placeholder:
-      return "NodeTy::Placeholder";
-      break;
-    case NodeTy::Add:
-      return "NodeTy::Add";
-      break;
+    RETURN_NODETYPE_STR(Placeholder)
+    RETURN_NODETYPE_STR(Add)
+    RETURN_NODETYPE_STR(Sub)
     default:
-      EXCEPTION("This ntype type is not supported...")
+      EXCEPTION("This node type is not supported...")
       break;
   }
 }
+#undef NODETYPE_STR
+#undef RETURN_NODETYPE_STR
 
-std::string to_string(const TargetTy& target)
+std::string to_string(const HostTy& target)
 {
   switch (target) {
-    case TargetTy::CPU:
-      return "TargetTy::CPU";
+    case HostTy::X86:
+      return "HostTy::X86";
       break;
-    case TargetTy::GPU:
-      return "TargetTy::GPU";
+    case HostTy::Arm32:
+      return "HostTy::Arm32";
       break;
-    case TargetTy::Others:
-      return "TargetTy::Others";
+    case HostTy::Arm64:
+      return "HostTy::Arm64";
       break;
     default:
       EXCEPTION("This target type is not supported...")

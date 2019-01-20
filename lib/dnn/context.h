@@ -10,20 +10,20 @@ using NodePtr = std::shared_ptr<Node>;
 class Context final
 {
 private:
-  TargetTy target_ = TargetTy::CPU;
+  HostTy target_ = HostTy::X86;
   DeviceTy device_ = DeviceTy::Generic;
 
 public:
   Context() = default;
   ~Context() = default;
-  Context(const TargetTy target, const DeviceTy device)
+  Context(const HostTy target, const DeviceTy device)
     : target_{target}, device_{device} {};
 
-  inline TargetTy target() const { return target_; }
+  inline HostTy target() const { return target_; }
   inline DeviceTy device() const { return device_; }
 
-  // static Context CPU() { return Context(TargetTy::CPU, DeviceTy::Generic); }
-  // static Context GPU() { return Context(TargetTy::GPU, DeviceTy::Geforce); }
+  // static Context CPU() { return Context(HostTy::CPU, DeviceTy::Generic); }
+  // static Context GPU() { return Context(HostTy::GPU, DeviceTy::Geforce); }
 };
 
 } // namespace dnn

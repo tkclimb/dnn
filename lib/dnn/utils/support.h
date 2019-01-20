@@ -5,7 +5,7 @@ namespace dnn {
 
 /// to_string
 std::string to_string(const NodeTy& ntype);
-std::string to_string(const TargetTy& target);
+std::string to_string(const HostTy& target);
 std::string to_string(const DeviceTy& device);
 
 class Tensor;

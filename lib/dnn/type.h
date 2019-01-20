@@ -17,11 +17,11 @@ enum class NodeTy
   Div,
 };
 
-enum class TargetTy
+enum class HostTy
 {
-  CPU,
-  GPU,
-  Others,
+  X86,
+  Arm32,
+  Arm64,
 };
 
 enum class DeviceTy

@@ -66,7 +66,7 @@ public:
   /// setter functions.
   inline void set_name(const std::string& name) { name_ = name; }
 
-  inline TargetTy target() const { return ctx_.target(); }
+  inline HostTy target() const { return ctx_.target(); }
   inline DeviceTy device() const { return ctx_.device(); }
 
   virtual void forward() = 0;
