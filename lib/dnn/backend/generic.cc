@@ -2,16 +2,29 @@
 #include "dnn/node.h"
 
 namespace dnn {
-namespace backend {
 
 template <>
-void forward<Add, DeviceTy::Generic>(Add& add)
+void Backend::forward<Placeholder, DeviceTy::Generic>(Placeholder& node)
 {
-  auto* A = add.input0()->data();
-  auto* B = add.input1()->data();
-  auto* C = add.data();
-  for (Index i = 0; i < add.elems(); ++i) { C[i] = A[i] + B[i]; }
+  node.tensor_.copy_from_vec(*(node.data_));
 }
 
-} // namespace backend
+template <>
+void Backend::forward<Add, DeviceTy::Generic>(Add& node)
+{
+  auto* A = node.input0()->data();
+  auto* B = node.input1()->data();
+  auto* C = node.data();
+  for (Index i = 0; i < node.elems(); ++i) { C[i] = A[i] + B[i]; }
+}
+
+template <>
+void Backend::forward<Sub, DeviceTy::Generic>(Sub& node)
+{
+  auto* A = node.input0()->data();
+  auto* B = node.input1()->data();
+  auto* C = node.data();
+  for (Index i = 0; i < node.elems(); ++i) { C[i] = A[i] - B[i]; }
+}
+
 } // namespace dnn

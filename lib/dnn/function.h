@@ -6,22 +6,27 @@
 #include "dnn/node.h"
 
 namespace dnn {
-namespace functional {
 
-NodePtr placeholder(const std::string& name, const Shape& shape,
-                    const Data& data, const Context& ctx)
+class Functional
 {
-  auto nptr = std::make_shared<Placeholder>(name, shape, data, ctx);
-  nptr->forward();
-  return nptr;
-}
+public:
+  static NodePtr placeholder(const std::string& name, const Shape& shape,
+                             const Data& data, const Context& ctx)
+  {
+    auto nptr = std::make_shared<Placeholder>(&data, shape, ctx);
+    nptr->set_name(name);
+    nptr->forward();
+    return nptr;
+  }
 
-NodePtr add(const std::string& name, NodePtr a, NodePtr b, const Context& ctx)
-{
-  auto nptr = std::make_shared<Add>(name, a, b, ctx);
-  nptr->forward();
-  return nptr;
-}
+  static NodePtr add(const std::string& name, NodePtr a, NodePtr b,
+                     const Context& ctx)
+  {
+    auto nptr = std::make_shared<Add>(a, b, ctx);
+    nptr->set_name(name);
+    nptr->forward();
+    return nptr;
+  }
+};
 
-} // namespace functional
 } // namespace dnn

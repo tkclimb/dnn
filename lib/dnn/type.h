@@ -12,6 +12,9 @@ enum class NodeTy
 {
   Placeholder,
   Add,
+  Sub,
+  Mul,
+  Div,
 };
 
 enum class TargetTy

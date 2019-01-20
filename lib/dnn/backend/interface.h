@@ -1,14 +1,30 @@
 #pragma once
-#include "dnn/context.h"
 #include "dnn/node.h"
+#include "dnn/type.h"
+#include "dnn/utils/checking.h"
 
 namespace dnn {
-namespace backend {
 
-using ::dnn::Add;
+class Backend
+{
+public:
+  Backend() = default;
+  ~Backend() = default;
 
-template <typename NodeTy, DeviceTy Device>
-void forward(NodeTy& add);
+  template <typename Node, DeviceTy Device>
+  void forward(Node&);
 
-} // namespace backend
+  template <typename Node>
+  void dispatch_forward(Node& node)
+  {
+    switch (node.device()) {
+      case DeviceTy::Generic:
+        forward<Node, DeviceTy::Generic>(node);
+        break;
+      default:
+        EXCEPTION("This device is not supported....");
+    }
+  }
+};
+
 } // namespace dnn

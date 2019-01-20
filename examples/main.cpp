@@ -8,7 +8,7 @@
 
 using namespace dnn;
 
-namespace F = functional;
+using F = Functional;
 
 int main(int argc, char const* argv[])
 {
