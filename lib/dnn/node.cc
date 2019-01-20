@@ -1,6 +1,7 @@
 #include "dnn/node.h"
 #include "dnn/backend/interface.h"
 #include "dnn/context.h"
+#include "dnn/utils/support.h"
 
 namespace dnn {
 

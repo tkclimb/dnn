@@ -92,7 +92,4 @@ private:
   }
 };
 
-void print_tensor(const Tensor&);
-Index print_tensor(const Tensor&, Index, Index);
-
 } // namespace dnn

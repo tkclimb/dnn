@@ -14,4 +14,22 @@ enum class NodeTy
   Add,
 };
 
+enum class TargetTy
+{
+  CPU,
+  GPU,
+  Others,
+};
+
+enum class DeviceTy
+{
+  Generic,
+  X86,
+  Arm32,
+  Arm64,
+  Geforce,
+  Vega,
+  Radeon,
+};
+
 } // namespace dnn

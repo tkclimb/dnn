@@ -1,45 +1,29 @@
 #pragma once
 #include <memory>
+#include "dnn/type.h"
 
-namespace {
+namespace dnn {
 
 class Node;
 using NodePtr = std::shared_ptr<Node>;
 
-enum class TargetTy
-{
-  Generic,
-  CPU,
-  GPU,
-};
-
-enum class DeviceTy
-{
-  Generic,
-  X86,
-  Arm32,
-  Arm64,
-  Geforce,
-  Vega,
-  Radeon,
-};
-
-class Context
+class Context final
 {
 private:
-  TargetTy target_;
-  DeviceTy device_;
+  TargetTy target_ = TargetTy::CPU;
+  DeviceTy device_ = DeviceTy::Generic;
 
 public:
+  Context() = default;
+  ~Context() = default;
   Context(const TargetTy target, const DeviceTy device)
     : target_{target}, device_{device} {};
-  ~Context() = default;
 
   inline TargetTy target() const { return target_; }
   inline DeviceTy device() const { return device_; }
 
-  static Context CPU() { return Context(TargetTy::CPU, DeviceTy::X86); }
-  static Context GPU() { return Context(TargetTy::GPU, DeviceTy::Geforce); }
+  // static Context CPU() { return Context(TargetTy::CPU, DeviceTy::Generic); }
+  // static Context GPU() { return Context(TargetTy::GPU, DeviceTy::Geforce); }
 };
 
-} // namespace
+} // namespace dnn

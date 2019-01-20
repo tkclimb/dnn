@@ -3,6 +3,7 @@
 #include "dnn/graph.h"
 #include "dnn/node.h"
 #include "dnn/tensor.h"
+#include "dnn/utils/support.h"
 #include "dnn/visitor.h"
 
 using namespace dnn;
@@ -11,7 +12,7 @@ namespace F = functional;
 
 int main(int argc, char const* argv[])
 {
-  auto ctx = Context::CPU();
+  auto ctx = Context();
   Shape s{2, 3};
   Data d1{1, 2, 3, 4, 5, 6};
   Data d2{1, 2, 3, 4, 5, 6};
@@ -20,7 +21,7 @@ int main(int argc, char const* argv[])
   auto p2 = F::placeholder("p2", s, d2, ctx);
   auto add = F::add("add1", p1, p2, ctx);
 
-  print_tensor(p1->tensor());
+  print(add->tensor());
   // auto v = new PrintVisitort();
   // add->accept(v);
 
