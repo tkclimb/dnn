@@ -14,6 +14,11 @@ class Node;
 using NodePtr = std::shared_ptr<Node>;
 using NodeVec = std::vector<NodePtr>;
 class Visitor;
+using VisitFunc = std::function<void(const Node*)>;
+
+class Placeholder;
+class Add;
+class Sub;
 
 class Node
 {
@@ -50,13 +55,16 @@ public:
 
   virtual ~Node() = default;
 
+  /// getter functions.
   inline NodeTy node_type() const { return ntype_; };
   inline const std::string& name() const { return name_; }
-  inline void set_name(const std::string& name) { name_ = name; }
   inline const Tensor& tensor() const { return tensor_; }
   inline Shape shape() const { return tensor_.shape(); }
   inline Index elems() const { return tensor_.elems(); }
   inline DEFAULT_DTYPE* data() { return tensor_.data(); }
+
+  /// setter functions.
+  inline void set_name(const std::string& name) { name_ = name; }
 
   inline TargetTy target() const { return ctx_.target(); }
   inline DeviceTy device() const { return ctx_.device(); }
@@ -65,6 +73,7 @@ public:
   virtual void backward() = 0;
 
   virtual void accept(Visitor*) const = 0;
+  virtual void accept(Visitor*, const VisitFunc&, const VisitFunc&) const = 0;
 };
 
 template <typename T>
@@ -85,6 +94,7 @@ public:
   virtual void backward() = 0;
 
   void accept(Visitor*) const;
+  void accept(Visitor*, const VisitFunc&, const VisitFunc&) const;
 };
 
 template <typename T>
@@ -100,10 +110,11 @@ public:
 
   virtual void forward() = 0;
   virtual void backward() = 0;
-  inline NodePtr input0() { return inputs_[0]; }
-  inline const NodePtr input0() const { return inputs_[0]; }
+  inline NodePtr a() { return inputs_[0]; }
+  inline const NodePtr a() const { return inputs_[0]; }
 
   void accept(Visitor*) const;
+  void accept(Visitor*, const VisitFunc&, const VisitFunc&) const;
 };
 
 template <typename T>
@@ -119,12 +130,13 @@ public:
 
   virtual void forward() = 0;
   virtual void backward() = 0;
-  inline NodePtr input0() { return inputs_[0]; }
-  inline NodePtr input1() { return inputs_[1]; }
-  inline const NodePtr input0() const { return inputs_[0]; }
-  inline const NodePtr input1() const { return inputs_[1]; }
+  inline NodePtr a() { return inputs_[0]; }
+  inline NodePtr b() { return inputs_[1]; }
+  inline const NodePtr a() const { return inputs_[0]; }
+  inline const NodePtr b() const { return inputs_[1]; }
 
   void accept(Visitor*) const;
+  void accept(Visitor*, const VisitFunc&, const VisitFunc&) const;
 };
 
 #define DEF_TENSOR_NODE(NAME)                           \

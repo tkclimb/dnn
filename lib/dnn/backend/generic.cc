@@ -12,8 +12,8 @@ void Backend::forward<Placeholder, DeviceTy::Generic>(Placeholder& node)
 template <>
 void Backend::forward<Add, DeviceTy::Generic>(Add& node)
 {
-  auto* A = node.input0()->data();
-  auto* B = node.input1()->data();
+  auto* A = node.a()->data();
+  auto* B = node.b()->data();
   auto* C = node.data();
   for (Index i = 0; i < node.elems(); ++i) { C[i] = A[i] + B[i]; }
 }
@@ -21,8 +21,8 @@ void Backend::forward<Add, DeviceTy::Generic>(Add& node)
 template <>
 void Backend::forward<Sub, DeviceTy::Generic>(Sub& node)
 {
-  auto* A = node.input0()->data();
-  auto* B = node.input1()->data();
+  auto* A = node.a()->data();
+  auto* B = node.b()->data();
   auto* C = node.data();
   for (Index i = 0; i < node.elems(); ++i) { C[i] = A[i] - B[i]; }
 }

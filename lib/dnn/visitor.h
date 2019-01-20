@@ -1,7 +1,16 @@
 #pragma once
+#include <functional>
 #include "dnn/node.h"
 
 namespace dnn {
+
+#define DECL_VISIT(NAME)                                          \
+  void visit(const NAME *);                                       \
+  void visit(const NAME *, const VisitFunc &, const VisitFunc &); \
+  virtual void visit_pre(const NAME *);                           \
+  virtual void visit_post(const NAME *);                          \
+  void visit_pre(const NAME *, const VisitFunc &);                \
+  void visit_post(const NAME *, const VisitFunc &);
 
 class Visitor
 {
@@ -9,30 +18,27 @@ public:
   Visitor() = default;
   ~Visitor() = default;
 
-  void visit(const Placeholder*);
-  void visit(const Add*);
-  void visit(const Sub*);
-
-  virtual void visit_pre(const Placeholder*) = 0;
-  virtual void visit_post(const Placeholder*) = 0;
-  virtual void visit_pre(const Add*) = 0;
-  virtual void visit_post(const Add*) = 0;
-  virtual void visit_pre(const Sub*) = 0;
-  virtual void visit_post(const Sub*) = 0;
+  DECL_VISIT(Placeholder)
+  DECL_VISIT(Add)
+  DECL_VISIT(Sub)
 };
 
-class PrintVisitor : public Visitor
-{
-public:
-  PrintVisitor() = default;
-  ~PrintVisitor() = default;
+#define DECL_VISIT_OVERRIDE(NAME)        \
+  void visit_pre(const NAME *) override; \
+  void visit_post(const NAME *) override;
 
-  virtual void visit_pre(const Placeholder*);
-  virtual void visit_post(const Placeholder*);
-  virtual void visit_pre(const Add*);
-  virtual void visit_post(const Add*);
-  virtual void visit_pre(const Sub*);
-  virtual void visit_post(const Sub*);
-};
+#define DEF_CUSTOM_VISITOR(NAME)     \
+  class NAME : public Visitor        \
+  {                                  \
+  public:                            \
+    NAME() = default;                \
+    ~NAME() = default;               \
+                                     \
+    DECL_VISIT_OVERRIDE(Placeholder) \
+    DECL_VISIT_OVERRIDE(Add)         \
+    DECL_VISIT_OVERRIDE(Sub)         \
+  };
+
+DEF_CUSTOM_VISITOR(PrintVisitor)
 
 } // namespace dnn
