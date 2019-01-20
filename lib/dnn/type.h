@@ -2,14 +2,9 @@
 #include <cinttypes>
 #include <vector>
 #include "dnn/arrayref.h"
+#include "dnn/utils/support.h"
 
 namespace dnn {
-
-/// declare common primitive types
-using DEFAULT_DTYPE = float;
-using Index = std::uint32_t;
-using Shape = std::vector<Index>;
-using Data = std::vector<DEFAULT_DTYPE>;
 
 /// Register some aliases to save typing long charactors.
 class Type;
@@ -17,14 +12,45 @@ using TypePtr = const Type*;
 
 constexpr unsigned MAX_TENSOR_DIMS = 8;
 
+namespace primitive {
+using F32 = float;
+using I32 = std::int32_t;
+using Idx = std::uint32_t;
+} // namespace primitive
+
+/// declare common type aliases
+using DEFAULT_DTYPE = primitive::F32;
+using Index = primitive::Idx;
+using Shape = std::vector<Index>;
+using Data = std::vector<DEFAULT_DTYPE>;
+
 /// Classes that represents a specific data type usually used in DNN.
 enum class DataTy : std::uint32_t
 {
-  F32,
-  I32,
-  Idx
+  F32, // primitive::F32
+  I32, // primitive::I32
+  Idx  // primitive::Idx
 };
 static constexpr DataTy DefaultDataTy = DataTy::F32;
+
+#define CASE(NAME, T, MACRO) \
+  case NAME::T: {            \
+    MACRO(T)                 \
+    break;                   \
+  }
+
+#define DEFAULT_EXCEPTION(T)                             \
+  default: {                                             \
+    EXCEPTION_STR(to_string(T) + "is not supported..."); \
+  }
+
+#define SWITCH_BY_DTYPE(DT, MACRO) \
+  switch (DT) {                    \
+    CASE(DataTy, F32, MACRO)       \
+    CASE(DataTy, I32, MACRO)       \
+    CASE(DataTy, Idx, MACRO)       \
+    DEFAULT_EXCEPTION(DT)          \
+  }
 
 /// Struct to deduce the data type from a given DataTy object
 template <DataTy DT>
@@ -33,29 +59,67 @@ struct MetaDataTy
   using type = void;
 };
 
+#define DEF_META_DTYPE(NAME)      \
+  template <>                     \
+  struct MetaDataTy<DataTy::NAME> \
+  {                               \
+    using type = primitive::NAME; \
+  };
+
 /// @{
-template <>
-struct MetaDataTy<DataTy::F32>
-{
-  using type = float;
-};
-
-template <>
-struct MetaDataTy<DataTy::I32>
-{
-  using type = std::int32_t;
-};
-
-template <>
-struct MetaDataTy<DataTy::Idx>
-{
-  using type = std::size_t;
-};
-
+DEF_META_DTYPE(F32)
+DEF_META_DTYPE(I32)
+DEF_META_DTYPE(Idx)
 /// @}
+
+#undef DEF_META_DTYPE
 
 template <DataTy T>
 using DeclDataTy = typename MetaDataTy<T>::type;
+
+enum class NodeTy : std::uint32_t
+{
+  Placeholder,
+  Add,
+  Sub,
+};
+
+enum class HostTy : std::uint32_t
+{
+  X86,
+};
+
+enum class DeviceTy : std::uint32_t
+{
+  Generic,
+  X86,
+};
+
+#define SWITCH_BY_NTYPE(T, MACRO)    \
+  switch (T) {                       \
+    CASE(NodeTy, Placeholder, MACRO) \
+    CASE(NodeTy, Add, MACRO)         \
+    CASE(NodeTy, Sub, MACRO)         \
+    DEFAULT_EXCEPTION(T)             \
+  }
+
+#define SWITCH_BY_HTYPE(T, MACRO) \
+  switch (T) {                    \
+    CASE(HostTy, X86, MACRO)      \
+    DEFAULT_EXCEPTION(T)          \
+  }
+
+#define SWITCH_BY_DEVTYPE(T, MACRO) \
+  switch (T) {                      \
+    CASE(DeviceTy, Generic, MACRO)  \
+    CASE(DeviceTy, X86, MACRO)      \
+    DEFAULT_EXCEPTION(T)            \
+  }
+
+#define ENUMERATE_NTYPE(MACRO) \
+  MARCO(Placeholder)           \
+  MARCO(Add)                   \
+  MARCO(Sub)
 
 /// Symbols that represent some a specific order usually used in DNN.
 enum class OrderTy : std::uint32_t
@@ -94,11 +158,14 @@ public:
     return *(this);
   }
 
-  /// Get the dimension
+  /// Get the data type
   DataTy dtype() const { return dtype_; }
 
-  /// Get the data dimension
+  /// Get the data shape
   const Shape& shape() const { return shape_; }
+
+  /// Get the number of dimension
+  Index ndims() const { return shape_.size(); }
 
   /// Return true the runtime dtype object matches this type object.
   bool is_type(DataTy dtype) const { return dtype_ == dtype; }
@@ -115,16 +182,9 @@ public:
   template <typename T>
   static bool IsType(DataTy dtype)
   {
-    switch (dtype) {
-      case DataTy::F32:
-        return std::is_same<T, float>::value;
-      case DataTy::I32:
-        return std::is_same<T, std::int32_t>::value;
-      case DataTy::Idx:
-        return std::is_same<T, Index>::value;
-      default:
-        EXCEPTION("The given data type is not supported...");
-    }
+#define RETURN_ISSAME(DT) return std::is_same<T, primitive::DT>::value;
+    SWITCH_BY_DTYPE(dtype, RETURN_ISSAME)
+#undef RETURN_ISSAME
   }
 
   /// Internal functions that compare types
@@ -132,18 +192,20 @@ public:
   inline bool is_same_dtype(const Type& x) const { return dtype_ == x.dtype_; }
 
   inline bool is_same_dims(const Type& x) const { return shape_ == x.shape_; }
+
   inline bool is_same(const Type& x) const
   {
     return is_same_dtype(x) && is_same_dims(x);
   }
+
   inline bool operator==(const Type& x) const { return is_same(x); }
   /// @}
 
   /// A function that generates scalar type with the given data type.
   template <typename T>
-  static Type FromPrimitive(ArrayRef<size_t> dims)
+  static Type FromPrimitive(ArrayRef<Index> shape)
   {
-    return Type(Type::GetDataTy<T>(), dims);
+    return Type(Type::GetDataTy<T>(), shape);
   }
 
   /// A function that generates scalar type with the given data type.
@@ -156,11 +218,11 @@ public:
   template <typename T>
   static DataTy GetDataTy()
   {
-    if (std::is_same<T, float>::value)
+    if (std::is_same<T, primitive::F32>::value)
       return DataTy::F32;
-    else if (std::is_same<T, std::int32_t>::value)
+    else if (std::is_same<T, primitive::I32>::value)
       return DataTy::I32;
-    else if (std::is_same<T, Index>::value)
+    else if (std::is_same<T, primitive::Idx>::value)
       return DataTy::Idx;
     else
       EXCEPTION("The given data type is not supported...");
@@ -168,44 +230,10 @@ public:
 
   static size_t SizeOfDataTy(DataTy dtype)
   {
-    switch (dtype) {
-      case DataTy::F32:
-        return sizeof(DeclDataTy<DataTy::F32>);
-      case DataTy::I32:
-        return sizeof(DeclDataTy<DataTy::I32>);
-      case DataTy::Idx:
-        return sizeof(DeclDataTy<DataTy::Idx>);
-      default:
-        EXCEPTION("The given data type is not supported...");
-    }
+#define RETURN_DTYPE(DT) return sizeof(DeclDataTy<DataTy::DT>);
+    SWITCH_BY_DTYPE(dtype, RETURN_DTYPE)
+#undef RETURN_DTYPE
   }
-};
-
-enum class NodeTy : std::uint32_t
-{
-  Placeholder,
-  Add,
-  Sub,
-  Mul,
-  Div,
-};
-
-enum class HostTy : std::uint32_t
-{
-  X86,
-  Arm32,
-  Arm64,
-};
-
-enum class DeviceTy : std::uint32_t
-{
-  Generic,
-  X86,
-  Arm32,
-  Arm64,
-  Geforce,
-  Vega,
-  Radeon,
 };
 
 } // namespace dnn

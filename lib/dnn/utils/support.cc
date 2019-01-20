@@ -1,75 +1,57 @@
 #include "dnn/utils/support.h"
-#include "dnn/tensor.h"
+#include "dnn/tensor/tensor.h"
 #include "dnn/type.h"
 #include "dnn/utils/checking.h"
 
 namespace dnn {
 
-#define NODETYPE_STR(NODETY) #NODETY
-
-#define RETURN_NODETYPE_STR(NODE)      \
-  case NodeTy::NODE:                   \
-    return NODETYPE_STR(NodeTy::NODE); \
-    break;
+std::string to_string(const DataTy& dtype)
+{
+#define DTYPE_STR(DT) #DT;
+#define RETURN_DTYPE_STR(DT) return DTYPE_STR(DataTy::DT);
+  SWITCH_BY_DTYPE(dtype, RETURN_DTYPE_STR)
+#undef DTYPE_STR
+#undef RETURN_DTYPE_STR
+}
 
 std::string to_string(const NodeTy& ntype)
 {
-  switch (ntype) {
-    RETURN_NODETYPE_STR(Placeholder)
-    RETURN_NODETYPE_STR(Add)
-    RETURN_NODETYPE_STR(Sub)
-    default:
-      EXCEPTION("This node type is not supported...")
-      break;
-  }
+#define NTYPE_STR(NT) #NT;
+#define RETURN_NTYPE_STR(NT) return NTYPE_STR(NodeTy::NT);
+  SWITCH_BY_NTYPE(ntype, RETURN_NTYPE_STR)
+#undef NTYPE_STR
+#undef RETURN_NTYPE_STR
 }
-#undef NODETYPE_STR
-#undef RETURN_NODETYPE_STR
 
-std::string to_string(const HostTy& target)
+std::string to_string(const HostTy& htype)
 {
-  switch (target) {
-    case HostTy::X86:
-      return "HostTy::X86";
-      break;
-    case HostTy::Arm32:
-      return "HostTy::Arm32";
-      break;
-    case HostTy::Arm64:
-      return "HostTy::Arm64";
-      break;
-    default:
-      EXCEPTION("This target type is not supported...")
-      break;
-  }
+#define HTYPE_STR(HT) #HT;
+#define RETURN_HTYPE_STR(HT) return HTYPE_STR(HostTy::HT);
+  SWITCH_BY_HTYPE(htype, RETURN_HTYPE_STR)
+#undef HTYPE_STR
+#undef RETURN_HTYPE_STR
 }
 
 std::string to_string(const DeviceTy& device)
 {
-  switch (device) {
-    case DeviceTy::Generic:
-      return "DeviceTy::Generic";
-      break;
-    case DeviceTy::X86:
-      return "DeviceTy::X86";
-      break;
-    case DeviceTy::Geforce:
-      return "DeviceTy::Geforce";
-      break;
-    default:
-      EXCEPTION("This device type is not supported...")
-      break;
-  }
+#define DEVTYPE_STR(DEVT) #DEVT;
+#define RETURN_DEVTYPE_STR(DEVT) return DEVTYPE_STR(DeviceTy::DEVT);
+  SWITCH_BY_DEVTYPE(device, RETURN_DEVTYPE_STR)
+#undef DEVTYPE_STR
+#undef RETURN_DEVTYPE_STR
 }
 
+template <DataTy DT>
 void print(const DeviceTy& device)
 {
   std::cout << to_string(device) << std::endl;
 }
 
+template <DataTy DT>
 Index print(const Tensor& tensor, Index rank, Index idx)
 {
   std::string indent = "";
+  auto acc = tensor.get_access<DT>();
   for (size_t i = 0; i < rank; ++i) { indent += "  "; }
 
   auto cur_elems = tensor.shape()[rank];
@@ -79,7 +61,7 @@ Index print(const Tensor& tensor, Index rank, Index idx)
     str += indent + "{ ";
 
     for (size_t i = 0; i < cur_elems; ++i) {
-      str += std::to_string(tensor[idx++]);
+      str += std::to_string(acc[idx++]);
       if (i != cur_elems - 1) {
         str += ", ";
       }
@@ -92,7 +74,7 @@ Index print(const Tensor& tensor, Index rank, Index idx)
     for (size_t i = 0; i < cur_elems; ++i) {
       std::cout << indent + "{\n";
 
-      idx = print(tensor, rank + 1, idx);
+      idx = print<DT>(tensor, rank + 1, idx);
 
       std::string str = "";
       str += indent + "}";
@@ -105,11 +87,15 @@ Index print(const Tensor& tensor, Index rank, Index idx)
   }
 }
 
+#define PRINT_TENSOR(DT) print<DataTy::DT>(tensor, 0, 0);
+
 void print(const Tensor& tensor)
 {
   std::cout << "Float ";
-  print(tensor, 0, 0);
+  SWITCH_BY_DTYPE(tensor.dtype(), PRINT_TENSOR)
   std::cout << std::endl;
 }
+
+#undef PRINT_TENSOR
 
 } // namespace dnn

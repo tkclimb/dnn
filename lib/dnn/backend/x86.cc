@@ -4,7 +4,7 @@
 
 namespace dnn {
 namespace backend {
-namespace Generic {
+namespace X86 {
 
 /*
 template <>
@@ -26,6 +26,6 @@ void Backend::forward<Sub, DeviceTy::Generic>(Sub& node)
 }
 */
 
-} // namespace Generic
+} // namespace X86
 } // namespace backend
 } // namespace dnn

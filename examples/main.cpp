@@ -2,7 +2,7 @@
 #include "dnn/function.h"
 #include "dnn/graph.h"
 #include "dnn/node.h"
-#include "dnn/tensor.h"
+#include "dnn/type.h"
 #include "dnn/utils/support.h"
 #include "dnn/visitor.h"
 
@@ -13,18 +13,22 @@ using F = Functional;
 int main(int argc, char const* argv[])
 {
   auto ctx = Context();
-  Shape s{2, 3};
-  Data d1{1, 2, 3, 4, 5, 6};
-  Data d2{1, 2, 3, 4, 5, 6};
+  Type ty{DataTy::F32, {2, 3}};
+  Tensor t1(ty);
+  Tensor t2(ty);
 
-  auto p1 = F::placeholder("p1", s, d1, ctx);
-  auto p2 = F::placeholder("p2", s, d2, ctx);
-  auto add = F::add("add1", p1, p2, ctx);
+  auto acc1 = t1.get_access<DataTy::F32>();
+  acc1 = {1, 2, 3, 4, 5, 6};
+  auto acc2 = t2.get_access<DataTy::F32>();
+  acc2 = {7, 8, 9, 10, 11, 12};
 
-  auto v = new PrintVisitor();
-  add->accept(v);
+  auto p1 = F::placeholder("p1", t1, ctx);
+  auto p2 = F::placeholder("p2", t2, ctx);
+  // auto add = F::add("add1", p1, p2, ctx);
+  print(p2->tensor());
 
-  // auto input = dnn::make_tensor(1, 28, 28, 1);
+  // auto v = new PrintVisitor();
+  // add->accept(v);
 
   return 0;
 }

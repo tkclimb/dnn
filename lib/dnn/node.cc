@@ -1,35 +1,29 @@
 #include "dnn/node.h"
-#include "dnn/backend/interface.h"
+#include "dnn/backend/executor.h"
 #include "dnn/context.h"
 #include "dnn/utils/support.h"
 
 namespace dnn {
 
-static Backend backend = Backend();
+static Executor executor = Executor();
 
-void Placeholder::forward()
-{
-  if (device() == DeviceTy::Generic) {
-    backend.forward<Placeholder, DeviceTy::Generic>(*this);
-  }
-}
+void Placeholder::forward() { executor.dispatch_forward(this); }
 void Placeholder::backward() {}
 
-template <>
-Shape BinaryOpNode<Add>::infer_shape(NodePtr a, NodePtr) const
-{
-  return a->shape();
-}
-
-template <>
-Shape BinaryOpNode<Sub>::infer_shape(NodePtr a, NodePtr) const
-{
-  return a->shape();
-}
-
-void Add::forward() { backend.dispatch_forward(*this); }
+void Add::forward() { executor.dispatch_forward(this); }
 void Add::backward() {}
-void Sub::forward() { backend.dispatch_forward(*this); }
+template <>
+inline const Type& infer_type<Add>(NodePtr a, NodePtr)
+{
+  return a->type();
+}
+
+void Sub::forward() { executor.dispatch_forward(this); }
 void Sub::backward() {}
+template <>
+inline const Type& infer_type<Sub>(NodePtr a, NodePtr)
+{
+  return a->type();
+}
 
 } // namespace dnn

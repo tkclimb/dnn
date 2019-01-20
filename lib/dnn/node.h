@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include "dnn/context.h"
-#include "dnn/tensor.h"
+#include "dnn/tensor/tensor.h"
 #include "dnn/type.h"
 #include "dnn/utils/checking.h"
 #include "dnn/utils/support.h"
@@ -33,22 +33,22 @@ protected:
 public:
   friend class Backend;
 
-  Node(const NodeTy ntype, NodeVec& inputs, const Shape& shape,
+  Node(const NodeTy ntype, NodeVec& inputs, const Type& type,
        const Context& ctx)
     : ntype_{ntype}
     , inputs_{inputs}
-    , tensor_{shape}
-    , grad_{shape}
+    , tensor_{type}
+    , grad_{type}
     , ctx_{ctx}
     , name_{to_string(ntype)}
   {}
 
-  Node(const NodeTy ntype, NodeVec&& inputs, const Shape& shape,
+  Node(const NodeTy ntype, NodeVec&& inputs, const Type& type,
        const Context& ctx)
     : ntype_{ntype}
     , inputs_{inputs}
-    , tensor_{shape}
-    , grad_{shape}
+    , tensor_{type}
+    , grad_{type}
     , ctx_{ctx}
     , name_{to_string(ntype)}
   {}
@@ -59,9 +59,13 @@ public:
   inline NodeTy node_type() const { return ntype_; };
   inline const std::string& name() const { return name_; }
   inline const Tensor& tensor() const { return tensor_; }
+  inline Tensor& tensor() { return tensor_; }
+
+  inline const Type& type() const { return tensor_.type(); }
+  inline DataTy dtype() const { return tensor_.dtype(); }
+
   inline Shape shape() const { return tensor_.shape(); }
   inline Index elems() const { return tensor_.elems(); }
-  inline DEFAULT_DTYPE* data() { return tensor_.data(); }
 
   /// setter functions.
   inline void set_name(const std::string& name) { name_ = name; }
@@ -82,12 +86,11 @@ class TensorNode : public Node
 public:
   friend class Backend;
 
-protected:
-  const Data* data_;
-
 public:
-  TensorNode(const Data* data, const Shape& shape, const Context& ctx)
-    : Node(T::NType, {}, shape, ctx), data_{data}
+  const Tensor* ref;
+
+  TensorNode(const Tensor& tensor, const Context& ctx)
+    : Node(T::NType, {}, tensor.type(), ctx), ref{&tensor}
   {}
 
   virtual void forward() = 0;
@@ -100,12 +103,9 @@ public:
 template <typename T>
 class UnaryOpNode : public Node
 {
-protected:
-  virtual Shape infer_shape(NodePtr a) const;
-
 public:
-  UnaryOpNode(NodePtr a, const Context& ctx)
-    : Node{T::NType, {a}, infer_shape(a), ctx}
+  UnaryOpNode(NodePtr a, const Type& type, const Context& ctx)
+    : Node{T::NType, {a}, type, ctx}
   {}
 
   virtual void forward() = 0;
@@ -120,12 +120,9 @@ public:
 template <typename T>
 class BinaryOpNode : public Node
 {
-protected:
-  Shape infer_shape(NodePtr a, NodePtr b) const;
-
 public:
-  BinaryOpNode(NodePtr a, NodePtr b, const Context& ctx)
-    : Node{T::NType, {a, b}, infer_shape(a, b), ctx}
+  BinaryOpNode(NodePtr a, NodePtr b, const Type& type, const Context& ctx)
+    : Node{T::NType, {a, b}, type, ctx}
   {}
 
   virtual void forward() = 0;
@@ -160,11 +157,7 @@ public:
     using UnaryOpNode::UnaryOpNode;                     \
     void forward();                                     \
     void backward();                                    \
-                                                        \
-  private:                                              \
-    Shape infer_shape(NodePtr a) const;                 \
-  };                                                    \
-  using NAME##Ptr = std::shared_ptr<NAME>;
+  };
 
 #define DEF_BINARY_OP_NODE(NAME)                        \
   class NAME final : public BinaryOpNode<NAME>          \
@@ -176,11 +169,16 @@ public:
     using BinaryOpNode::BinaryOpNode;                   \
     void forward();                                     \
     void backward();                                    \
-  };                                                    \
-  using NAME##Ptr = std::shared_ptr<NAME>;
+  };
 
 DEF_TENSOR_NODE(Placeholder)
 DEF_BINARY_OP_NODE(Add)
 DEF_BINARY_OP_NODE(Sub)
+
+template <typename T>
+inline const Type& infer_type(NodePtr);
+
+template <typename T>
+inline const Type& infer_type(NodePtr, NodePtr);
 
 } // namespace dnn
