@@ -11,7 +11,7 @@ namespace backend {
 
 #define DEF_DEFAULT_BACKEND_FUNC(DEV, F, N) \
   template <DataTy T>                       \
-  void F(N*)                                \
+  void F(N&)                                \
   {                                         \
     std::string msg = to_string(T);         \
     msg += " ";                             \

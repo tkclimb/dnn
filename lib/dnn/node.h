@@ -56,7 +56,7 @@ public:
   virtual ~Node() = default;
 
   /// getter functions.
-  inline NodeTy node_type() const { return ntype_; };
+  inline NodeTy ntype() const { return ntype_; };
   inline const std::string& name() const { return name_; }
   inline const Tensor& tensor() const { return tensor_; }
   inline Tensor& tensor() { return tensor_; }
@@ -71,7 +71,7 @@ public:
   inline void set_name(const std::string& name) { name_ = name; }
 
   inline HostTy target() const { return ctx_.target(); }
-  inline DeviceTy device() const { return ctx_.device(); }
+  inline DeviceTy devtype() const { return ctx_.devtype(); }
 
   virtual void forward() = 0;
   virtual void backward() = 0;
@@ -176,9 +176,9 @@ DEF_BINARY_OP_NODE(Add)
 DEF_BINARY_OP_NODE(Sub)
 
 template <typename T>
-inline const Type& infer_type(NodePtr);
+const Type& infer_type(NodePtr);
 
 template <typename T>
-inline const Type& infer_type(NodePtr, NodePtr);
+const Type& infer_type(NodePtr, NodePtr);
 
 } // namespace dnn

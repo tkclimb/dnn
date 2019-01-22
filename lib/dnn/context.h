@@ -20,7 +20,7 @@ public:
     : target_{target}, device_{device} {};
 
   inline HostTy target() const { return target_; }
-  inline DeviceTy device() const { return device_; }
+  inline DeviceTy devtype() const { return device_; }
 
   // static Context CPU() { return Context(HostTy::CPU, DeviceTy::Generic); }
   // static Context GPU() { return Context(HostTy::GPU, DeviceTy::Geforce); }

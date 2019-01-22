@@ -9,12 +9,12 @@ namespace Generic {
 
 // DEF_DEFAULT_BACKEND_FORWARD(Generic, Placeholder)
 template <DataTy T>
-void forward(Placeholder* node)
+void forward(Placeholder& node)
 {
-  auto acc = node->tensor().get_access<T>();
+  auto acc = node.tensor().get_access<T>();
   acc.init();
-  auto ref = node->ref->get_access<T>();
-  for (Index i = 0; i < node->elems(); ++i) { acc[i] = ref[i]; }
+  auto ref = node.ref->get_access<T>();
+  for (Index i = 0; i < node.elems(); ++i) { acc[i] = ref[i]; }
 }
 
 DEF_DEFAULT_BACKEND_FORWARD(Generic, Add)

@@ -13,27 +13,26 @@ public:
   Executor() = default;
   ~Executor() = default;
 
-  inline void dispatch_forward(Node* node)
+  inline void dispatch_forward(Node& node)
   {
-#define CALL(T) f<T>((T*)node);
-    SWITCH_BY_NTYPE(node->node_type(), CALL)
+#define CALL(T) dispatch_forward_by_dtype<T>((T&)node);
+    SWITCH_BY_NTYPE(node.ntype(), CALL)
 #undef CALL
   }
 
   template <typename NodeT>
-  inline void f(NodeT* node)
+  inline void dispatch_forward_by_dtype(NodeT& node)
   {
-#define CALL(T) ff<NodeT, DataTy::T>(node);
-    SWITCH_BY_DTYPE(node->dtype(), CALL)
+#define CALL(T) dispatch_forward_by_devtype<NodeT, DataTy::T>(node);
+    SWITCH_BY_DTYPE(node.dtype(), CALL)
 #undef CALL
   }
 
   template <typename NodeT, DataTy DataT>
-  inline void ff(NodeT* node)
+  inline void dispatch_forward_by_devtype(NodeT& node)
   {
-// #define CALL(T) backend::forward<NodeT, DevT, DataTy::T>(node);
 #define CALL(T) backend::T::forward<DataT>(node);
-    SWITCH_BY_DEVTYPE(node->device(), CALL)
+    SWITCH_BY_DEVTYPE(node.devtype(), CALL)
 #undef CALL
   }
 };
