@@ -49,7 +49,7 @@ private:
   TensorFormat fmt_;
 
   /// Data storage of tensor that can contain variant data types.
-  TensorStorage storage_;
+  TensorStorage storage_{type_};
 
 public:
   ~Tensor() = default;
@@ -90,11 +90,7 @@ public:
   inline const Shape& shape() const { return type_.shape(); }
 
   /// Get the number of elements in this tensor.
-  inline Index elems() const
-  {
-    return std::accumulate(shape().begin(), shape().end(), 1,
-                           std::multiplies<Index>());
-  }
+  inline Index elems() const { return type_.elems(); }
 
   /// Get the rank of this tensor.
   inline Index rank() const { return type_.ndims(); }

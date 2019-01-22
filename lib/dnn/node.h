@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "dnn/context.h"
+#include "dnn/name_manager.h"
 #include "dnn/tensor/tensor.h"
 #include "dnn/type.h"
 #include "dnn/utils/checking.h"
@@ -15,10 +16,6 @@ using NodePtr = std::shared_ptr<Node>;
 using NodeVec = std::vector<NodePtr>;
 class Visitor;
 using VisitFunc = std::function<void(const Node*)>;
-
-class Placeholder;
-class Add;
-class Sub;
 
 class Node
 {
@@ -40,7 +37,7 @@ public:
     , tensor_{type}
     , grad_{type}
     , ctx_{ctx}
-    , name_{to_string(ntype)}
+    , name_{NameManager::MakeUnique(to_string(ntype))}
   {}
 
   Node(const NodeTy ntype, NodeVec&& inputs, const Type& type,
@@ -50,7 +47,7 @@ public:
     , tensor_{type}
     , grad_{type}
     , ctx_{ctx}
-    , name_{to_string(ntype)}
+    , name_{NameManager::MakeUnique(to_string(ntype))}
   {}
 
   virtual ~Node() = default;
@@ -63,7 +60,6 @@ public:
 
   inline const Type& type() const { return tensor_.type(); }
   inline DataTy dtype() const { return tensor_.dtype(); }
-
   inline Shape shape() const { return tensor_.shape(); }
   inline Index elems() const { return tensor_.elems(); }
 
@@ -83,6 +79,9 @@ public:
 template <typename T>
 class TensorNode : public Node
 {
+private:
+  bool init_ = false;
+
 public:
   friend class Backend;
 
@@ -174,10 +173,10 @@ public:
 DEF_TENSOR_NODE(Placeholder)
 DEF_BINARY_OP_NODE(Add)
 DEF_BINARY_OP_NODE(Sub)
+DEF_BINARY_OP_NODE(Mul)
 
 template <typename T>
 const Type& infer_type(NodePtr);
-
 template <typename T>
 const Type& infer_type(NodePtr, NodePtr);
 

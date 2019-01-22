@@ -24,8 +24,10 @@ int main(int argc, char const* argv[])
 
   auto p1 = F::placeholder("p1", t1, ctx);
   auto p2 = F::placeholder("p2", t2, ctx);
-  // auto add = F::add("add1", p1, p2, ctx);
-  print(p2->tensor());
+  auto add = F::add("add1", p1, p2, ctx);
+  // auto mul = F::mul("mul1", add, p2, ctx);
+
+  print(add->tensor());
 
   // auto v = new PrintVisitor();
   // add->accept(v);

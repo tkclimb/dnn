@@ -82,6 +82,7 @@ enum class NodeTy : std::uint32_t
   Placeholder,
   Add,
   Sub,
+  Mul,
 };
 
 enum class HostTy : std::uint32_t
@@ -100,6 +101,7 @@ enum class DeviceTy : std::uint32_t
     CASE(NodeTy, Placeholder, MACRO) \
     CASE(NodeTy, Add, MACRO)         \
     CASE(NodeTy, Sub, MACRO)         \
+    CASE(NodeTy, Mul, MACRO)         \
     DEFAULT_EXCEPTION(T)             \
   }
 
@@ -163,6 +165,13 @@ public:
 
   /// Get the data shape
   const Shape& shape() const { return shape_; }
+
+  /// Get the number of elements in this tensor.
+  inline Index elems() const
+  {
+    return std::accumulate(shape().begin(), shape().end(), 1,
+                           std::multiplies<Index>());
+  }
 
   /// Get the number of dimension
   Index ndims() const { return shape_.size(); }

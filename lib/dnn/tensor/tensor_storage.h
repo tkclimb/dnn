@@ -39,6 +39,25 @@ public:
   TensorStorage(const TensorStorage&) = delete;
   TensorStorage(const TensorStorage&&) = delete;
 
+  TensorStorage(const Type& type)
+  {
+#define ALLOCATE_MEMORY(T) init<primitive::T>(type.elems());
+    SWITCH_BY_DTYPE(type.dtype(), ALLOCATE_MEMORY)
+#undef ALLOCATE_MEMORY
+  }
+
+  /// init the memory space
+  template <typename T>
+  void init(Index elems)
+  {
+    free();
+    elems_ = elems;
+    size_t nbytes = elems * sizeof(T);
+    T* allocated = reinterpret_cast<T*>(std::malloc(nbytes));
+    data_ = reinterpret_cast<void*>(allocated);
+    dtype_ = Type::GetDataTy<T>();
+  }
+
   /// Get low pointer for optimized computation.
   /// This should be handled carefully.
   template <typename T>
@@ -52,18 +71,6 @@ public:
     } else {
       EXCEPTION("The given type differs from the currently contained...");
     }
-  }
-
-  /// init the memory space
-  template <typename T>
-  void init(Index elems)
-  {
-    free();
-    elems_ = elems;
-    size_t nbytes = elems * sizeof(T);
-    T* allocated = reinterpret_cast<T*>(std::malloc(nbytes));
-    data_ = reinterpret_cast<void*>(allocated);
-    dtype_ = Type::GetDataTy<T>();
   }
 
   /// Copy the given data as a specific type.

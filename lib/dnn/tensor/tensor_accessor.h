@@ -40,9 +40,8 @@ public:
   /// Create a scaler tensor storage.
   TensorAccessor() = delete;
   ~TensorAccessor() = default;
-  TensorAccessor(TensorAccessor&) = delete;
+  TensorAccessor(TensorAccessor&) = default;
   TensorAccessor(const TensorAccessor&) = delete;
-  TensorAccessor(const TensorAccessor&&) = delete;
 
   TensorAccessor(TensorAccessor&& other)
     : tensor_{other.tensor_}, extents_{other.extents_}
@@ -62,7 +61,11 @@ public:
   }
 
   /// Init means just allocates the memory, not clear at all.
-  void init() { tensor_->storage_.init<T>(elems()); }
+  TensorAccessor& init()
+  {
+    tensor_->storage_.init<T>(elems());
+    return *this;
+  }
 
   /// Get contained data from storage
   inline T* data() { return tensor_->storage_.data<T>(); }

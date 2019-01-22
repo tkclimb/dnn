@@ -11,14 +11,40 @@ namespace Generic {
 template <DataTy T>
 void forward(Placeholder& node)
 {
-  auto acc = node.tensor().get_access<T>();
-  acc.init();
-  auto ref = node.ref->get_access<T>();
-  for (Index i = 0; i < node.elems(); ++i) { acc[i] = ref[i]; }
+  auto y = node.tensor().get_access<T>();
+  auto x = node.ref->get_access<T>();
+  for (Index i = 0; i < node.elems(); ++i) { y[i] = x[i]; }
 }
 
-DEF_DEFAULT_BACKEND_FORWARD(Generic, Add)
-DEF_DEFAULT_BACKEND_FORWARD(Generic, Sub)
+// DEF_DEFAULT_BACKEND_FORWARD(Generic, Add)
+template <DataTy T>
+void forward(Add& node)
+{
+  auto a = node.a()->tensor().get_access<T>();
+  auto b = node.b()->tensor().get_access<T>();
+  auto c = node.tensor().get_access<T>();
+  for (Index i = 0; i < node.elems(); ++i) { c[i] = a[i] + b[i]; }
+}
+
+// DEF_DEFAULT_BACKEND_FORWARD(Generic, Sub)
+template <DataTy T>
+void forward(Sub& node)
+{
+  auto a = node.a()->tensor().get_access<T>();
+  auto b = node.a()->tensor().get_access<T>();
+  auto c = node.tensor().get_access<T>();
+  for (Index i = 0; i < node.elems(); ++i) { c[i] = a[i] - b[i]; }
+}
+
+// DEF_DEFAULT_BACKEND_FORWARD(Generic, Mul)
+template <DataTy T>
+void forward(Mul& node)
+{
+  auto a = node.a()->tensor().get_access<T>();
+  auto b = node.a()->tensor().get_access<T>();
+  auto c = node.tensor().get_access<T>();
+  for (Index i = 0; i < node.elems(); ++i) { c[i] = a[i] * b[i]; }
+}
 
 } // namespace Generic
 } // namespace backend

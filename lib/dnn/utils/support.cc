@@ -91,7 +91,7 @@ Index print(const Tensor& tensor, Index rank, Index idx)
 
 void print(const Tensor& tensor)
 {
-  std::cout << "Float ";
+  std::cout << to_string(tensor.dtype()) << " ";
   SWITCH_BY_DTYPE(tensor.dtype(), PRINT_TENSOR)
   std::cout << std::endl;
 }
