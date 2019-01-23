@@ -18,6 +18,28 @@ using I32 = std::int32_t;
 using Idx = std::uint32_t;
 } // namespace primitive
 
+/**
+ * @brief User defined types
+ *
+ */
+#define DEFINED_DTYPES(MACRO) \
+  MACRO(F32)                  \
+  MACRO(I32) MACRO(Idx)
+
+#define DEFINED_NTYPES(MACRO) DEFINED_NTYPES_BY_OPS(MACRO, MACRO, MACRO)
+
+#define DEFINED_NTYPES_BY_OPS(TENSOR_NODE_MACRO, UNARY_NODE_MACRO, \
+                              BINARY_NODE_MACRO)                   \
+  TENSOR_NODE_MACRO(Placeholder)                                   \
+  BINARY_NODE_MACRO(Add)                                           \
+  BINARY_NODE_MACRO(Sub) BINARY_NODE_MACRO(Mul) BINARY_NODE_MACRO(Mutmul)
+
+#define DEFINED_HTYPES(MACRO) MACRO(X86)
+
+#define DEFINED_DEVTYPES(MACRO) MACRO(Generic) MACRO(X86)
+
+/* */
+
 /// declare common type aliases
 using DEFAULT_DTYPE = primitive::F32;
 using Index = primitive::Idx;
@@ -27,9 +49,9 @@ using Data = std::vector<DEFAULT_DTYPE>;
 /// Classes that represents a specific data type usually used in DNN.
 enum class DataTy : std::uint32_t
 {
-  F32, // primitive::F32
-  I32, // primitive::I32
-  Idx  // primitive::Idx
+#define DEF(T) T,
+  DEFINED_DTYPES(DEF)
+#undef DEF
 };
 static constexpr DataTy DefaultDataTy = DataTy::F32;
 
@@ -39,9 +61,9 @@ static constexpr DataTy DefaultDataTy = DataTy::F32;
     break;                   \
   }
 
-#define DEFAULT_EXCEPTION(T)                             \
-  default: {                                             \
-    EXCEPTION_STR(to_string(T) + "is not supported..."); \
+#define DEFAULT_EXCEPTION(T)                              \
+  default: {                                              \
+    EXCEPTION_STR(to_string(T) + " is not supported..."); \
   }
 
 #define SWITCH_BY_DTYPE(DT, MACRO) \
@@ -52,48 +74,25 @@ static constexpr DataTy DefaultDataTy = DataTy::F32;
     DEFAULT_EXCEPTION(DT)          \
   }
 
-/// Struct to deduce the data type from a given DataTy object
-template <DataTy DT>
-struct MetaDataTy
-{
-  using type = void;
-};
-
-#define DEF_META_DTYPE(NAME)      \
-  template <>                     \
-  struct MetaDataTy<DataTy::NAME> \
-  {                               \
-    using type = primitive::NAME; \
-  };
-
-/// @{
-DEF_META_DTYPE(F32)
-DEF_META_DTYPE(I32)
-DEF_META_DTYPE(Idx)
-/// @}
-
-#undef DEF_META_DTYPE
-
-template <DataTy T>
-using DeclDataTy = typename MetaDataTy<T>::type;
-
 enum class NodeTy : std::uint32_t
 {
-  Placeholder,
-  Add,
-  Sub,
-  Mul,
+#define DEF(T) T,
+  DEFINED_NTYPES(DEF)
+#undef DEF
 };
 
 enum class HostTy : std::uint32_t
 {
-  X86,
+#define DEF(T) T,
+  DEFINED_HTYPES(DEF)
+#undef DEF
 };
 
 enum class DeviceTy : std::uint32_t
 {
-  Generic,
-  X86,
+#define DEF(T) T,
+  DEFINED_DEVTYPES(DEF)
+#undef DEF
 };
 
 #define SWITCH_BY_NTYPE(T, MACRO)    \
@@ -102,6 +101,7 @@ enum class DeviceTy : std::uint32_t
     CASE(NodeTy, Add, MACRO)         \
     CASE(NodeTy, Sub, MACRO)         \
     CASE(NodeTy, Mul, MACRO)         \
+    CASE(NodeTy, Mutmul, MACRO)      \
     DEFAULT_EXCEPTION(T)             \
   }
 
@@ -118,10 +118,24 @@ enum class DeviceTy : std::uint32_t
     DEFAULT_EXCEPTION(T)            \
   }
 
-#define ENUMERATE_NTYPE(MACRO) \
-  MARCO(Placeholder)           \
-  MARCO(Add)                   \
-  MARCO(Sub)
+/// Struct to deduce the data type from a given DataTy object
+template <DataTy DT>
+struct MetaDataTy
+{
+  using type = void;
+};
+
+#define DEF_META_DTYPE(NAME)      \
+  template <>                     \
+  struct MetaDataTy<DataTy::NAME> \
+  {                               \
+    using type = primitive::NAME; \
+  };
+DEFINED_DTYPES(DEF_META_DTYPE)
+#undef DEF_META_DTYPE
+
+template <DataTy T>
+using DeclDataTy = typename MetaDataTy<T>::type;
 
 /// Symbols that represent some a specific order usually used in DNN.
 enum class OrderTy : std::uint32_t

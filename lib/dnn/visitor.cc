@@ -50,37 +50,38 @@ namespace dnn {
   void Visitor::visit_pre(const NAME *x, const VisitFunc &f) { f(x); } \
   void Visitor::visit_post(const NAME *x, const VisitFunc &f) { f(x); }
 
-#define DEF_VISIT_TENSOR_NODE(NAME) \
-  DEF_VISITABLE_TENSOR_NODE(NAME)   \
-  DEF_VISIT_PRE_AND_POST(NAME)
+#define DEF_VISIT_TENSOR_NODE(T) \
+  DEF_VISITABLE_TENSOR_NODE(T)   \
+  DEF_VISIT_PRE_AND_POST(T)
 
-#define DEF_VISIT_BINARY_OP_NODE(NAME) \
-  DEF_VISITABLE_BINARY_OP_NODE(NAME)   \
-  DEF_VISIT_PRE_AND_POST(NAME)
+#define DEF_VISIT_BINARY_OP_NODE(T) \
+  DEF_VISITABLE_BINARY_OP_NODE(T)   \
+  DEF_VISIT_PRE_AND_POST(T)
 
-DEF_VISIT_TENSOR_NODE(Placeholder)
-DEF_VISIT_BINARY_OP_NODE(Add)
-DEF_VISIT_BINARY_OP_NODE(Sub)
+DEFINED_NTYPES_BY_OPS(DEF_VISIT_TENSOR_NODE, _, DEF_VISIT_BINARY_OP_NODE)
 
-using std::cout;
-using std::endl;
+// void PrintVisitor::visit_pre(const Placeholder *) {}
+// void PrintVisitor::visit_post(const Placeholder *x)
+// {
+//   cout << "Placeholder[" << x->name() << "]" << endl;
+// }
 
-void PrintVisitor::visit_pre(const Placeholder *) {}
-void PrintVisitor::visit_post(const Placeholder *x)
-{
-  cout << "Placeholder[" << x->name() << "]" << endl;
-}
+// void PrintVisitor::visit_pre(const Add *) {}
+// void PrintVisitor::visit_post(const Add *x)
+// {
+//   cout << "Add[" << x->name() << "]" << endl;
+// }
 
-void PrintVisitor::visit_pre(const Add *) {}
-void PrintVisitor::visit_post(const Add *x)
-{
-  cout << "Add[" << x->name() << "]" << endl;
-}
+// void PrintVisitor::visit_pre(const Sub *) {}
+// void PrintVisitor::visit_post(const Sub *x)
+// {
+//   cout << "Sub[" << x->name() << "]" << endl;
+// }
 
-void PrintVisitor::visit_pre(const Sub *) {}
-void PrintVisitor::visit_post(const Sub *x)
-{
-  cout << "Sub[" << x->name() << "]" << endl;
-}
+// void PrintVisitor::visit_pre(const Sub *) {}
+// void PrintVisitor::visit_post(const Sub *x)
+// {
+//   cout << "Sub[" << x->name() << "]" << endl;
+// }
 
 } // namespace dnn

@@ -7,21 +7,36 @@ namespace dnn {
 
 static Executor executor = Executor();
 
-void Placeholder::forward() { executor.dispatch_forward(*this); }
-void Placeholder::backward() {}
+#define DEF_NODE_FUNC(NT)                                  \
+  void NT::forward() { executor.dispatch_forward(*this); } \
+  void NT::backward() {}
 
-void Add::forward() { executor.dispatch_forward(*this); }
-void Add::backward() {}
+DEF_NODE_FUNC(Placeholder)
+
+DEF_NODE_FUNC(Add)
 template <>
 const Type& infer_type<Add>(NodePtr a, NodePtr)
 {
   return a->type();
 }
 
-void Sub::forward() { executor.dispatch_forward(*this); }
-void Sub::backward() {}
+DEF_NODE_FUNC(Sub)
 template <>
 const Type& infer_type<Sub>(NodePtr a, NodePtr)
+{
+  return a->type();
+}
+
+DEF_NODE_FUNC(Mul)
+template <>
+const Type& infer_type<Mul>(NodePtr a, NodePtr)
+{
+  return a->type();
+}
+
+DEF_NODE_FUNC(Mutmul)
+template <>
+const Type& infer_type<Mutmul>(NodePtr a, NodePtr)
 {
   return a->type();
 }

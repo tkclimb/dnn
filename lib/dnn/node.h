@@ -170,10 +170,7 @@ public:
     void backward();                                    \
   };
 
-DEF_TENSOR_NODE(Placeholder)
-DEF_BINARY_OP_NODE(Add)
-DEF_BINARY_OP_NODE(Sub)
-DEF_BINARY_OP_NODE(Mul)
+DEFINED_NTYPES_BY_OPS(DEF_TENSOR_NODE, _, DEF_BINARY_OP_NODE)
 
 template <typename T>
 const Type& infer_type(NodePtr);
