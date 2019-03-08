@@ -7,9 +7,9 @@ namespace dnn {
 
 static Executor executor = Executor();
 
-#define DEF_NODE_FUNC(NT)                                  \
-  void NT::forward() { executor.dispatch_forward(*this); } \
-  void NT::backward() {}
+#define DEF_NODE_FUNC(NAME)                                  \
+  void NAME::forward() { executor.dispatch_forward(*this); } \
+  void NAME::backward() {}
 
 DEF_NODE_FUNC(Placeholder)
 
@@ -34,9 +34,9 @@ const Type& infer_type<Mul>(NodePtr a, NodePtr)
   return a->type();
 }
 
-DEF_NODE_FUNC(Mutmul)
+DEF_NODE_FUNC(Matmul)
 template <>
-const Type& infer_type<Mutmul>(NodePtr a, NodePtr)
+const Type& infer_type<Matmul>(NodePtr a, NodePtr)
 {
   return a->type();
 }

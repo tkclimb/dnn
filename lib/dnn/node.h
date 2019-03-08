@@ -77,100 +77,50 @@ public:
 };
 
 template <typename T>
-class TensorNode : public Node
+class VisitableNode : public Node
+{
+public:
+  using Node::Node;
+  void accept(Visitor*) const;
+  void accept(Visitor*, const VisitFunc&, const VisitFunc&) const;
+};
+
+#define DEFINE_BASIC_NODE_FUNCS \
+  void forward() override;      \
+  void backward() override;
+
+class Placeholder : public VisitableNode<Placeholder>
 {
 private:
   bool init_ = false;
 
 public:
-  friend class Backend;
-
-public:
   const Tensor* ref;
 
-  TensorNode(const Tensor& tensor, const Context& ctx)
-    : Node(T::NType, {}, tensor.type(), ctx), ref{&tensor}
+  Placeholder(const Tensor& tensor, const Context& ctx)
+    : VisitableNode(NodeTy::Placeholder, {}, tensor.type(), ctx), ref{&tensor}
   {}
-
-  virtual void forward() = 0;
-  virtual void backward() = 0;
-
-  void accept(Visitor*) const;
-  void accept(Visitor*, const VisitFunc&, const VisitFunc&) const;
+  DEFINE_BASIC_NODE_FUNCS
 };
 
-template <typename T>
-class UnaryOpNode : public Node
-{
-public:
-  UnaryOpNode(NodePtr a, const Type& type, const Context& ctx)
-    : Node{T::NType, {a}, type, ctx}
-  {}
-
-  virtual void forward() = 0;
-  virtual void backward() = 0;
-  inline NodePtr a() { return inputs_[0]; }
-  inline const NodePtr a() const { return inputs_[0]; }
-
-  void accept(Visitor*) const;
-  void accept(Visitor*, const VisitFunc&, const VisitFunc&) const;
-};
-
-template <typename T>
-class BinaryOpNode : public Node
-{
-public:
-  BinaryOpNode(NodePtr a, NodePtr b, const Type& type, const Context& ctx)
-    : Node{T::NType, {a, b}, type, ctx}
-  {}
-
-  virtual void forward() = 0;
-  virtual void backward() = 0;
-  inline NodePtr a() { return inputs_[0]; }
-  inline NodePtr b() { return inputs_[1]; }
-  inline const NodePtr a() const { return inputs_[0]; }
-  inline const NodePtr b() const { return inputs_[1]; }
-
-  void accept(Visitor*) const;
-  void accept(Visitor*, const VisitFunc&, const VisitFunc&) const;
-};
-
-#define DEF_TENSOR_NODE(NAME)                           \
-  class NAME final : public TensorNode<NAME>            \
-  {                                                     \
-  public:                                               \
-    static constexpr const NodeTy NType = NodeTy::NAME; \
-    static constexpr const char* Name = #NAME;          \
-    using TensorNode::TensorNode;                       \
-    void forward();                                     \
-    void backward();                                    \
+#define DEFINE_ARITHMETIC_OP(NAME)                                   \
+  class NAME : public VisitableNode<NAME>                            \
+  {                                                                  \
+  public:                                                            \
+    NAME(NodePtr a, NodePtr b, const Type& type, const Context& ctx) \
+      : VisitableNode{NodeTy::NAME, {a, b}, type, ctx}               \
+    {}                                                               \
+    inline NodePtr a() { return inputs_[0]; }                        \
+    inline NodePtr b() { return inputs_[1]; }                        \
+    inline const NodePtr a() const { return inputs_[0]; }            \
+    inline const NodePtr b() const { return inputs_[1]; }            \
+    DEFINE_BASIC_NODE_FUNCS                                          \
   };
 
-#define DEF_UNARY_OP_NODE(NAME)                         \
-  class NAME final : public UnaryOpNode                 \
-  {                                                     \
-  public:                                               \
-    static constexpr const NodeTy NType = NodeTy::NAME; \
-    static constexpr const char* Name = #NAME;          \
-                                                        \
-    using UnaryOpNode::UnaryOpNode;                     \
-    void forward();                                     \
-    void backward();                                    \
-  };
-
-#define DEF_BINARY_OP_NODE(NAME)                        \
-  class NAME final : public BinaryOpNode<NAME>          \
-  {                                                     \
-  public:                                               \
-    static constexpr const NodeTy NType = NodeTy::NAME; \
-    static constexpr const char* Name = #NAME;          \
-                                                        \
-    using BinaryOpNode::BinaryOpNode;                   \
-    void forward();                                     \
-    void backward();                                    \
-  };
-
-DEFINED_NODETYS_BY_OPS(DEF_TENSOR_NODE, _, DEF_BINARY_OP_NODE)
+DEFINE_ARITHMETIC_OP(Add)
+DEFINE_ARITHMETIC_OP(Sub)
+DEFINE_ARITHMETIC_OP(Mul)
+DEFINE_ARITHMETIC_OP(Matmul)
 
 template <typename T>
 const Type& infer_type(NodePtr);

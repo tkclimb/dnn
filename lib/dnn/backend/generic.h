@@ -48,7 +48,7 @@ void forward(Mul& node)
 
 // DEF_DEFAULT_BACKEND_FORWARD(Generic, Mul)
 template <DataTy T>
-void forward(Mutmul& node)
+void forward(Matmul& node)
 {
   // auto a = node.a()->tensor().get_access<T>();
   // auto b = node.b()->tensor().get_access<T>();

@@ -26,13 +26,12 @@ using Idx = std::uint32_t;
   MACRO(F32)                   \
   MACRO(I32) MACRO(Idx)
 
-#define DEFINED_NODETYS(MACRO) DEFINED_NODETYS_BY_OPS(MACRO, MACRO, MACRO)
-
-#define DEFINED_NODETYS_BY_OPS(TENSOR_NODE_MACRO, UNARY_NODE_MACRO, \
-                               BINARY_NODE_MACRO)                   \
-  TENSOR_NODE_MACRO(Placeholder)                                    \
-  BINARY_NODE_MACRO(Add)                                            \
-  BINARY_NODE_MACRO(Sub) BINARY_NODE_MACRO(Mul) BINARY_NODE_MACRO(Mutmul)
+#define DEFINED_NODETYS(MACRO) \
+  MACRO(Placeholder)           \
+  MACRO(Add)                   \
+  MACRO(Sub)                   \
+  MACRO(Mul)                   \
+  MACRO(Matmul)
 
 #define DEFINED_HOSTTYS(MACRO) MACRO(X86)
 
@@ -101,7 +100,7 @@ enum class DeviceTy : std::uint32_t
     CASE(NodeTy, Add, MACRO)         \
     CASE(NodeTy, Sub, MACRO)         \
     CASE(NodeTy, Mul, MACRO)         \
-    CASE(NodeTy, Mutmul, MACRO)      \
+    CASE(NodeTy, Matmul, MACRO)      \
     DEFAULT_EXCEPTION(T)             \
   }
 

@@ -2,30 +2,30 @@
 
 namespace dnn {
 
-#define DEF_VISITABLE_NODE(TY, NAME)                        \
-  template <>                                               \
-  void TY<NAME>::accept(Visitor *v) const                   \
-  {                                                         \
-    v->visit_pre((const NAME *)this);                       \
-    v->visit((const NAME *)this);                           \
-    v->visit_post((const NAME *)this);                      \
-  }                                                         \
-  template <>                                               \
-  void TY<NAME>::accept(Visitor *v, const VisitFunc &f_pre, \
-                        const VisitFunc &f_post) const      \
-  {                                                         \
-    v->visit_pre((const NAME *)this, f_pre);                \
-    v->visit((const NAME *)this, f_pre, f_post);            \
-    v->visit_post((const NAME *)this, f_post);              \
+#define DEF_VISITABLE_NODE(NAME)                                       \
+  template <>                                                          \
+  void VisitableNode<NAME>::accept(Visitor *v) const                   \
+  {                                                                    \
+    v->visit_pre((const NAME *)this);                                  \
+    v->visit((const NAME *)this);                                      \
+    v->visit_post((const NAME *)this);                                 \
+  }                                                                    \
+  template <>                                                          \
+  void VisitableNode<NAME>::accept(Visitor *v, const VisitFunc &f_pre, \
+                                   const VisitFunc &f_post) const      \
+  {                                                                    \
+    v->visit_pre((const NAME *)this, f_pre);                           \
+    v->visit((const NAME *)this, f_pre, f_post);                       \
+    v->visit_post((const NAME *)this, f_post);                         \
   }
 
-#define DEF_VISITABLE_TENSOR_NODE(NAME) \
-  DEF_VISITABLE_NODE(TensorNode, NAME)  \
-  void Visitor::visit(const NAME *) {}  \
+#define DEF_VISITABLE_NOARG_NODE(NAME) \
+  DEF_VISITABLE_NODE(NAME)             \
+  void Visitor::visit(const NAME *) {} \
   void Visitor::visit(const NAME *, const VisitFunc &, const VisitFunc &) {}
 
 #define DEF_VISITABLE_BINARY_OP_NODE(NAME)                   \
-  DEF_VISITABLE_NODE(BinaryOpNode, NAME)                     \
+  DEF_VISITABLE_NODE(NAME)                                   \
   void Visitor::visit(const NAME *x)                         \
   {                                                          \
     x->a()->accept(this);                                    \
@@ -50,38 +50,18 @@ namespace dnn {
   void Visitor::visit_pre(const NAME *x, const VisitFunc &f) { f(x); } \
   void Visitor::visit_post(const NAME *x, const VisitFunc &f) { f(x); }
 
-#define DEF_VISIT_TENSOR_NODE(T) \
-  DEF_VISITABLE_TENSOR_NODE(T)   \
-  DEF_VISIT_PRE_AND_POST(T)
+#define DEF_VISIT_NOARG_NODE(NAME) \
+  DEF_VISITABLE_NOARG_NODE(NAME)   \
+  DEF_VISIT_PRE_AND_POST(NAME)
 
-#define DEF_VISIT_BINARY_OP_NODE(T) \
-  DEF_VISITABLE_BINARY_OP_NODE(T)   \
-  DEF_VISIT_PRE_AND_POST(T)
+#define DEF_VISIT_BINARY_OP_NODE(NAME) \
+  DEF_VISITABLE_BINARY_OP_NODE(NAME)   \
+  DEF_VISIT_PRE_AND_POST(NAME)
 
-DEFINED_NODETYS_BY_OPS(DEF_VISIT_TENSOR_NODE, _, DEF_VISIT_BINARY_OP_NODE)
-
-// void PrintVisitor::visit_pre(const Placeholder *) {}
-// void PrintVisitor::visit_post(const Placeholder *x)
-// {
-//   cout << "Placeholder[" << x->name() << "]" << endl;
-// }
-
-// void PrintVisitor::visit_pre(const Add *) {}
-// void PrintVisitor::visit_post(const Add *x)
-// {
-//   cout << "Add[" << x->name() << "]" << endl;
-// }
-
-// void PrintVisitor::visit_pre(const Sub *) {}
-// void PrintVisitor::visit_post(const Sub *x)
-// {
-//   cout << "Sub[" << x->name() << "]" << endl;
-// }
-
-// void PrintVisitor::visit_pre(const Sub *) {}
-// void PrintVisitor::visit_post(const Sub *x)
-// {
-//   cout << "Sub[" << x->name() << "]" << endl;
-// }
+DEF_VISIT_NOARG_NODE(Placeholder)
+DEF_VISIT_BINARY_OP_NODE(Add)
+DEF_VISIT_BINARY_OP_NODE(Sub)
+DEF_VISIT_BINARY_OP_NODE(Mul)
+DEF_VISIT_BINARY_OP_NODE(Matmul)
 
 } // namespace dnn
