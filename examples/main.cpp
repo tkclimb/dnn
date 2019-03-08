@@ -22,10 +22,12 @@ int main(int argc, char const* argv[])
   auto acc2 = t2.get_access<DataTy::F32>();
   acc2 = {7, 8, 9, 10, 11, 12};
 
-  auto p1 = F::placeholder("p1", t1, ctx);
-  auto p2 = F::placeholder("p2", t2, ctx);
-  auto add = F::add("add1", p1, p2, ctx);
-  auto mul = F::mul("mul1", add, p2, ctx);
+  Graph g;
+
+  auto p1 = F::placeholder("p1", t1, g, ctx);
+  auto p2 = F::placeholder("p2", t2, g, ctx);
+  auto add = F::add("add1", p1, p2, g, ctx);
+  auto mul = F::mul("mul1", add, p2, g, ctx);
 
   // print(add->tensor());
   print(mul->tensor());
