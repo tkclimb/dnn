@@ -5,6 +5,6 @@ build/
 .vscode/
 
 # git submodules
-thirdparty/*
-!thirdparty/CMakeLists.txt
+thirdparty/eigen/
+thirdparty/googletest/
 

@@ -1,6 +1,6 @@
-[submodule "THIRDParty/eigen"]
-	path = THIRDParty/eigen
-	url = https://github.com/eigenteam/eigen-git-mirror.git
 [submodule "thirdparty/googletest"]
 	path = thirdparty/googletest
 	url = https://github.com/google/googletest.git
+[submodule "thirdparty/eigen"]
+	path = thirdparty/eigen
+	url = https://github.com/eigenteam/eigen-git-mirror.git
