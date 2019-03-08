@@ -5,40 +5,40 @@
 
 namespace dnn {
 
-std::string to_string(const DataTy& dtype)
+std::string to_string(const DataTy& dataty)
 {
-#define DTYPE_STR(DT) #DT;
-#define RETURN_DTYPE_STR(DT) return DTYPE_STR(DataTy::DT);
-  SWITCH_BY_DTYPE(dtype, RETURN_DTYPE_STR)
-#undef DTYPE_STR
-#undef RETURN_DTYPE_STR
+#define DATATY_STR(DT) #DT;
+#define RETURN_DATATY_STR(DT) return DATATY_STR(DataTy::DT);
+  SWITCH_BY_DATATY(dataty, RETURN_DATATY_STR)
+#undef DATATY_STR
+#undef RETURN_DATATY_STR
 }
 
-std::string to_string(const NodeTy& ntype)
+std::string to_string(const NodeTy& nodety)
 {
-#define NTYPE_STR(NT) #NT;
-#define RETURN_NTYPE_STR(NT) return NTYPE_STR(NodeTy::NT);
-  SWITCH_BY_NTYPE(ntype, RETURN_NTYPE_STR)
-#undef NTYPE_STR
-#undef RETURN_NTYPE_STR
+#define NODETY_STR(NT) #NT;
+#define RETURN_NODETY_STR(NT) return NODETY_STR(NodeTy::NT);
+  SWITCH_BY_NODETY(nodety, RETURN_NODETY_STR)
+#undef NODETY_STR
+#undef RETURN_NODETY_STR
 }
 
-std::string to_string(const HostTy& htype)
+std::string to_string(const HostTy& hostty)
 {
-#define HTYPE_STR(HT) #HT;
-#define RETURN_HTYPE_STR(HT) return HTYPE_STR(HostTy::HT);
-  SWITCH_BY_HTYPE(htype, RETURN_HTYPE_STR)
-#undef HTYPE_STR
-#undef RETURN_HTYPE_STR
+#define HOSTTY_STR(HT) #HT;
+#define RETURN_HOSTTY_STR(HT) return HOSTTY_STR(HostTy::HT);
+  SWITCH_BY_HOSTTY(hostty, RETURN_HOSTTY_STR)
+#undef HOSTTY_STR
+#undef RETURN_HOSTTY_STR
 }
 
 std::string to_string(const DeviceTy& device)
 {
-#define DEVTYPE_STR(DEVT) #DEVT;
-#define RETURN_DEVTYPE_STR(DEVT) return DEVTYPE_STR(DeviceTy::DEVT);
-  SWITCH_BY_DEVTYPE(device, RETURN_DEVTYPE_STR)
-#undef DEVTYPE_STR
-#undef RETURN_DEVTYPE_STR
+#define DEVTY_STR(DEVT) #DEVT;
+#define RETURN_DEVTY_STR(DEVT) return DEVTY_STR(DeviceTy::DEVT);
+  SWITCH_BY_DEVTY(device, RETURN_DEVTY_STR)
+#undef DEVTY_STR
+#undef RETURN_DEVTY_STR
 }
 
 template <DataTy DT>
@@ -91,8 +91,8 @@ Index print(const Tensor& tensor, Index rank, Index idx)
 
 void print(const Tensor& tensor)
 {
-  std::cout << to_string(tensor.dtype()) << " ";
-  SWITCH_BY_DTYPE(tensor.dtype(), PRINT_TENSOR)
+  std::cout << to_string(tensor.dataty()) << " ";
+  SWITCH_BY_DATATY(tensor.dataty(), PRINT_TENSOR)
   std::cout << std::endl;
 }
 

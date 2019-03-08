@@ -29,7 +29,7 @@ public:
   Index elems_ = 0;
 
   /// The data type.
-  DataTy dtype_ = DefaultDataTy;
+  DataTy dataty_ = DefaultDataTy;
 
 public:
   TensorStorage() = default;
@@ -42,7 +42,7 @@ public:
   TensorStorage(const Type& type)
   {
 #define ALLOCATE_MEMORY(T) init<primitive::T>(type.elems());
-    SWITCH_BY_DTYPE(type.dtype(), ALLOCATE_MEMORY)
+    SWITCH_BY_DATATY(type.dataty(), ALLOCATE_MEMORY)
 #undef ALLOCATE_MEMORY
   }
 
@@ -55,7 +55,7 @@ public:
     size_t nbytes = elems * sizeof(T);
     T* allocated = reinterpret_cast<T*>(std::malloc(nbytes));
     data_ = reinterpret_cast<void*>(allocated);
-    dtype_ = Type::GetDataTy<T>();
+    dataty_ = Type::GetDataTy<T>();
   }
 
   /// Get low pointer for optimized computation.
@@ -63,7 +63,7 @@ public:
   template <typename T>
   T* data()
   {
-    if (Type::IsType<T>(dtype_)) {
+    if (Type::IsType<T>(dataty_)) {
       if (!is_init()) {
         EXCEPTION("This hasn't been set any data yet...");
       }
@@ -84,7 +84,7 @@ public:
     std::memcpy(allocated, data.data(), nbytes);
 
     data_ = reinterpret_cast<void*>(allocated);
-    dtype_ = Type::GetDataTy<T>();
+    dataty_ = Type::GetDataTy<T>();
     return *this;
   }
 
@@ -92,7 +92,7 @@ public:
   inline Index elems() const { return elems_; }
 
   /// Get the array size.
-  inline Index sizeof_data() const { return Type::SizeOfDataTy(dtype_); }
+  inline Index sizeof_data() const { return Type::SizeOfDataTy(dataty_); }
 
 private:
   /// Check it's initialized yet or not.

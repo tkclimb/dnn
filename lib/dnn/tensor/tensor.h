@@ -69,13 +69,13 @@ public:
   explicit Tensor(const std::string& name) : name_{name}, type_{} {}
 
   /// Create a tensor with the given shape
-  explicit Tensor(DataTy dtype, ArrayRef<Index> shape)
-    : name_{NameManager::MakeUnique("Tensor")}, type_{dtype, shape} {};
+  explicit Tensor(DataTy dataty, ArrayRef<Index> shape)
+    : name_{NameManager::MakeUnique("Tensor")}, type_{dataty, shape} {};
 
-  /// Create a tensor with the given name, dtype and shape.
-  explicit Tensor(const std::string& name, const DataTy dtype,
+  /// Create a tensor with the given name, dataty and shape.
+  explicit Tensor(const std::string& name, const DataTy dataty,
                   ArrayRef<Index> shape)
-    : name_{name}, type_{dtype, shape} {};
+    : name_{name}, type_{dataty, shape} {};
 
   /// Get the name of this tensor.
   inline const std::string& name() const { return name_; }
@@ -84,7 +84,7 @@ public:
   inline const Type& type() const { return type_; }
 
   /// Get the data type of this tensor.
-  inline DataTy dtype() const { return type_.dtype(); }
+  inline DataTy dataty() const { return type_.dataty(); }
 
   /// Get the shape of this tensor.
   inline const Shape& shape() const { return type_.shape(); }

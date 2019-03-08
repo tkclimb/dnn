@@ -58,7 +58,7 @@ namespace dnn {
   DEF_VISITABLE_BINARY_OP_NODE(T)   \
   DEF_VISIT_PRE_AND_POST(T)
 
-DEFINED_NTYPES_BY_OPS(DEF_VISIT_TENSOR_NODE, _, DEF_VISIT_BINARY_OP_NODE)
+DEFINED_NODETYS_BY_OPS(DEF_VISIT_TENSOR_NODE, _, DEF_VISIT_BINARY_OP_NODE)
 
 // void PrintVisitor::visit_pre(const Placeholder *) {}
 // void PrintVisitor::visit_post(const Placeholder *x)

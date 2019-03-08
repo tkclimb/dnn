@@ -22,35 +22,35 @@ using Idx = std::uint32_t;
  * @brief User defined types
  *
  */
-#define DEFINED_DTYPES(MACRO) \
-  MACRO(F32)                  \
+#define DEFINED_DATATYS(MACRO) \
+  MACRO(F32)                   \
   MACRO(I32) MACRO(Idx)
 
-#define DEFINED_NTYPES(MACRO) DEFINED_NTYPES_BY_OPS(MACRO, MACRO, MACRO)
+#define DEFINED_NODETYS(MACRO) DEFINED_NODETYS_BY_OPS(MACRO, MACRO, MACRO)
 
-#define DEFINED_NTYPES_BY_OPS(TENSOR_NODE_MACRO, UNARY_NODE_MACRO, \
-                              BINARY_NODE_MACRO)                   \
-  TENSOR_NODE_MACRO(Placeholder)                                   \
-  BINARY_NODE_MACRO(Add)                                           \
+#define DEFINED_NODETYS_BY_OPS(TENSOR_NODE_MACRO, UNARY_NODE_MACRO, \
+                               BINARY_NODE_MACRO)                   \
+  TENSOR_NODE_MACRO(Placeholder)                                    \
+  BINARY_NODE_MACRO(Add)                                            \
   BINARY_NODE_MACRO(Sub) BINARY_NODE_MACRO(Mul) BINARY_NODE_MACRO(Mutmul)
 
-#define DEFINED_HTYPES(MACRO) MACRO(X86)
+#define DEFINED_HOSTTYS(MACRO) MACRO(X86)
 
-#define DEFINED_DEVTYPES(MACRO) MACRO(Generic) MACRO(X86)
+#define DEFINED_DEVTYS(MACRO) MACRO(Generic) MACRO(X86)
 
 /* */
 
 /// declare common type aliases
-using DEFAULT_DTYPE = primitive::F32;
+using DEFAULT_DATATY = primitive::F32;
 using Index = primitive::Idx;
 using Shape = std::vector<Index>;
-using Data = std::vector<DEFAULT_DTYPE>;
+using Data = std::vector<DEFAULT_DATATY>;
 
 /// Classes that represents a specific data type usually used in DNN.
 enum class DataTy : std::uint32_t
 {
 #define DEF(T) T,
-  DEFINED_DTYPES(DEF)
+  DEFINED_DATATYS(DEF)
 #undef DEF
 };
 static constexpr DataTy DefaultDataTy = DataTy::F32;
@@ -66,36 +66,36 @@ static constexpr DataTy DefaultDataTy = DataTy::F32;
     EXCEPTION_STR(to_string(T) + " is not supported..."); \
   }
 
-#define SWITCH_BY_DTYPE(DT, MACRO) \
-  switch (DT) {                    \
-    CASE(DataTy, F32, MACRO)       \
-    CASE(DataTy, I32, MACRO)       \
-    CASE(DataTy, Idx, MACRO)       \
-    DEFAULT_EXCEPTION(DT)          \
+#define SWITCH_BY_DATATY(DT, MACRO) \
+  switch (DT) {                     \
+    CASE(DataTy, F32, MACRO)        \
+    CASE(DataTy, I32, MACRO)        \
+    CASE(DataTy, Idx, MACRO)        \
+    DEFAULT_EXCEPTION(DT)           \
   }
 
 enum class NodeTy : std::uint32_t
 {
 #define DEF(T) T,
-  DEFINED_NTYPES(DEF)
+  DEFINED_NODETYS(DEF)
 #undef DEF
 };
 
 enum class HostTy : std::uint32_t
 {
 #define DEF(T) T,
-  DEFINED_HTYPES(DEF)
+  DEFINED_HOSTTYS(DEF)
 #undef DEF
 };
 
 enum class DeviceTy : std::uint32_t
 {
 #define DEF(T) T,
-  DEFINED_DEVTYPES(DEF)
+  DEFINED_DEVTYS(DEF)
 #undef DEF
 };
 
-#define SWITCH_BY_NTYPE(T, MACRO)    \
+#define SWITCH_BY_NODETY(T, MACRO)   \
   switch (T) {                       \
     CASE(NodeTy, Placeholder, MACRO) \
     CASE(NodeTy, Add, MACRO)         \
@@ -105,17 +105,17 @@ enum class DeviceTy : std::uint32_t
     DEFAULT_EXCEPTION(T)             \
   }
 
-#define SWITCH_BY_HTYPE(T, MACRO) \
-  switch (T) {                    \
-    CASE(HostTy, X86, MACRO)      \
-    DEFAULT_EXCEPTION(T)          \
+#define SWITCH_BY_HOSTTY(T, MACRO) \
+  switch (T) {                     \
+    CASE(HostTy, X86, MACRO)       \
+    DEFAULT_EXCEPTION(T)           \
   }
 
-#define SWITCH_BY_DEVTYPE(T, MACRO) \
-  switch (T) {                      \
-    CASE(DeviceTy, Generic, MACRO)  \
-    CASE(DeviceTy, X86, MACRO)      \
-    DEFAULT_EXCEPTION(T)            \
+#define SWITCH_BY_DEVTY(T, MACRO)  \
+  switch (T) {                     \
+    CASE(DeviceTy, Generic, MACRO) \
+    CASE(DeviceTy, X86, MACRO)     \
+    DEFAULT_EXCEPTION(T)           \
   }
 
 /// Struct to deduce the data type from a given DataTy object
@@ -125,14 +125,14 @@ struct MetaDataTy
   using type = void;
 };
 
-#define DEF_META_DTYPE(NAME)      \
+#define DEF_META_DATATY(NAME)     \
   template <>                     \
   struct MetaDataTy<DataTy::NAME> \
   {                               \
     using type = primitive::NAME; \
   };
-DEFINED_DTYPES(DEF_META_DTYPE)
-#undef DEF_META_DTYPE
+DEFINED_DATATYS(DEF_META_DATATY)
+#undef DEF_META_DATATY
 
 template <DataTy T>
 using DeclDataTy = typename MetaDataTy<T>::type;
@@ -152,7 +152,7 @@ class Type final
 {
 private:
   /// data type of tensor of this type.
-  DataTy dtype_ = DefaultDataTy;
+  DataTy dataty_ = DefaultDataTy;
   /// shape of tensor of this type by default it's scalar
   Shape shape_ = {1};
   /// order of the tensor of this type by default it's NHWC
@@ -163,19 +163,19 @@ public:
   Type() = default;
   ~Type() = default;
   /// Create the default type as a scalar.
-  explicit Type(DataTy dtype) : dtype_{dtype} {}
+  explicit Type(DataTy dataty) : dataty_{dataty} {}
   /// Create the given type with the given dimensions.
-  Type(DataTy dtype, ArrayRef<Index> shape) : dtype_{dtype}, shape_{shape} {}
+  Type(DataTy dataty, ArrayRef<Index> shape) : dataty_{dataty}, shape_{shape} {}
 
   Type operator=(const Type ty)
   {
-    dtype_ = ty.dtype();
+    dataty_ = ty.dataty();
     shape_ = ty.shape();
     return *(this);
   }
 
   /// Get the data type
-  DataTy dtype() const { return dtype_; }
+  DataTy dataty() const { return dataty_; }
 
   /// Get the data shape
   const Shape& shape() const { return shape_; }
@@ -190,35 +190,38 @@ public:
   /// Get the number of dimension
   Index ndims() const { return shape_.size(); }
 
-  /// Return true the runtime dtype object matches this type object.
-  bool is_type(DataTy dtype) const { return dtype_ == dtype; }
+  /// Return true the runtime dataty object matches this type object.
+  bool is_type(DataTy dataty) const { return dataty_ == dataty; }
 
   /// Return true the templated parameter matches this type object.
   template <typename T>
   bool is_type() const
   {
-    return IsType<T>(dtype_);
+    return IsType<T>(dataty_);
   }
 
   /// Return true by comparing templated parameter and each data type
   /// respectively.
   template <typename T>
-  static bool IsType(DataTy dtype)
+  static bool IsType(DataTy dataty)
   {
 #define RETURN_ISSAME(DT) return std::is_same<T, primitive::DT>::value;
-    SWITCH_BY_DTYPE(dtype, RETURN_ISSAME)
+    SWITCH_BY_DATATY(dataty, RETURN_ISSAME)
 #undef RETURN_ISSAME
   }
 
   /// Internal functions that compare types
   /// @{
-  inline bool is_same_dtype(const Type& x) const { return dtype_ == x.dtype_; }
+  inline bool is_same_dataty(const Type& x) const
+  {
+    return dataty_ == x.dataty_;
+  }
 
   inline bool is_same_dims(const Type& x) const { return shape_ == x.shape_; }
 
   inline bool is_same(const Type& x) const
   {
-    return is_same_dtype(x) && is_same_dims(x);
+    return is_same_dataty(x) && is_same_dims(x);
   }
 
   inline bool operator==(const Type& x) const { return is_same(x); }
@@ -251,11 +254,11 @@ public:
       EXCEPTION("The given data type is not supported...");
   }
 
-  static size_t SizeOfDataTy(DataTy dtype)
+  static size_t SizeOfDataTy(DataTy dataty)
   {
-#define RETURN_DTYPE(DT) return sizeof(DeclDataTy<DataTy::DT>);
-    SWITCH_BY_DTYPE(dtype, RETURN_DTYPE)
-#undef RETURN_DTYPE
+#define RETURN_DATATY(DT) return sizeof(DeclDataTy<DataTy::DT>);
+    SWITCH_BY_DATATY(dataty, RETURN_DATATY)
+#undef RETURN_DATATY
   }
 };
 

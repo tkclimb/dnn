@@ -18,7 +18,7 @@ public:
   Visitor() = default;
   ~Visitor() = default;
 
-  DEFINED_NTYPES(DECL_VISIT)
+  DEFINED_NODETYS(DECL_VISIT)
 };
 
 #define DECL_VISIT_OVERRIDE(NAME)        \

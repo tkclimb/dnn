@@ -11,10 +11,10 @@ enum class DeviceTy : std::uint32_t;
 /// to_string
 #define TO_STRING(T) to_string(T);
 
-std::string to_string(const DataTy& dtype);
-std::string to_string(const NodeTy& ntype);
-std::string to_string(const HostTy& htype);
-std::string to_string(const DeviceTy& devtype);
+std::string to_string(const DataTy& dataty);
+std::string to_string(const NodeTy& nodety);
+std::string to_string(const HostTy& hostty);
+std::string to_string(const DeviceTy& devty);
 
 class Tensor;
 

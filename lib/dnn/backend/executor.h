@@ -15,24 +15,24 @@ public:
 
   inline void dispatch_forward(Node& node)
   {
-#define CALL(T) dispatch_forward_by_dtype<T>((T&)node);
-    SWITCH_BY_NTYPE(node.ntype(), CALL)
+#define CALL(T) dispatch_forward_by_dataty<T>((T&)node);
+    SWITCH_BY_NODETY(node.nodety(), CALL)
 #undef CALL
   }
 
   template <typename NodeT>
-  inline void dispatch_forward_by_dtype(NodeT& node)
+  inline void dispatch_forward_by_dataty(NodeT& node)
   {
-#define CALL(T) dispatch_forward_by_devtype<NodeT, DataTy::T>(node);
-    SWITCH_BY_DTYPE(node.dtype(), CALL)
+#define CALL(T) dispatch_forward_by_devty<NodeT, DataTy::T>(node);
+    SWITCH_BY_DATATY(node.dataty(), CALL)
 #undef CALL
   }
 
   template <typename NodeT, DataTy DataT>
-  inline void dispatch_forward_by_devtype(NodeT& node)
+  inline void dispatch_forward_by_devty(NodeT& node)
   {
 #define CALL(T) backend::T::forward<DataT>(node);
-    SWITCH_BY_DEVTYPE(node.devtype(), CALL)
+    SWITCH_BY_DEVTY(node.devty(), CALL)
 #undef CALL
   }
 };

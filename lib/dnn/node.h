@@ -20,7 +20,7 @@ using VisitFunc = std::function<void(const Node*)>;
 class Node
 {
 protected:
-  NodeTy ntype_;
+  NodeTy nodety_;
   NodeVec inputs_;
   Tensor tensor_;
   Tensor grad_;
@@ -30,44 +30,44 @@ protected:
 public:
   friend class Backend;
 
-  Node(const NodeTy ntype, NodeVec& inputs, const Type& type,
+  Node(const NodeTy nodety, NodeVec& inputs, const Type& type,
        const Context& ctx)
-    : ntype_{ntype}
+    : nodety_{nodety}
     , inputs_{inputs}
     , tensor_{type}
     , grad_{type}
     , ctx_{ctx}
-    , name_{NameManager::MakeUnique(to_string(ntype))}
+    , name_{NameManager::MakeUnique(to_string(nodety))}
   {}
 
-  Node(const NodeTy ntype, NodeVec&& inputs, const Type& type,
+  Node(const NodeTy nodety, NodeVec&& inputs, const Type& type,
        const Context& ctx)
-    : ntype_{ntype}
+    : nodety_{nodety}
     , inputs_{inputs}
     , tensor_{type}
     , grad_{type}
     , ctx_{ctx}
-    , name_{NameManager::MakeUnique(to_string(ntype))}
+    , name_{NameManager::MakeUnique(to_string(nodety))}
   {}
 
   virtual ~Node() = default;
 
   /// getter functions.
-  inline NodeTy ntype() const { return ntype_; };
+  inline NodeTy nodety() const { return nodety_; };
   inline const std::string& name() const { return name_; }
   inline const Tensor& tensor() const { return tensor_; }
   inline Tensor& tensor() { return tensor_; }
 
   inline const Type& type() const { return tensor_.type(); }
-  inline DataTy dtype() const { return tensor_.dtype(); }
+  inline DataTy dataty() const { return tensor_.dataty(); }
   inline Shape shape() const { return tensor_.shape(); }
   inline Index elems() const { return tensor_.elems(); }
 
   /// setter functions.
   inline void set_name(const std::string& name) { name_ = name; }
 
-  inline HostTy target() const { return ctx_.target(); }
-  inline DeviceTy devtype() const { return ctx_.devtype(); }
+  inline HostTy hostty() const { return ctx_.hostty(); }
+  inline DeviceTy devty() const { return ctx_.devty(); }
 
   virtual void forward() = 0;
   virtual void backward() = 0;
@@ -170,7 +170,7 @@ public:
     void backward();                                    \
   };
 
-DEFINED_NTYPES_BY_OPS(DEF_TENSOR_NODE, _, DEF_BINARY_OP_NODE)
+DEFINED_NODETYS_BY_OPS(DEF_TENSOR_NODE, _, DEF_BINARY_OP_NODE)
 
 template <typename T>
 const Type& infer_type(NodePtr);
