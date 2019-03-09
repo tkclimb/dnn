@@ -42,6 +42,8 @@ private:
   /// Tensor's name.
   std::string name_;
 
+  /// Owner node of this tensor
+
   /// Type of tensor's data.
   Type type_;
 

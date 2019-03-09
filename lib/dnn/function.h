@@ -12,33 +12,30 @@ namespace dnn {
 class Functional
 {
 public:
-  static NodePtr placeholder(const std::string& name, const Tensor& tensor,
-                             Graph& graph, const Context& ctx)
+  static NodePtr placeholder(const std::string& name, const Type& ty,
+                             Graph& graph, Context& ctx)
   {
-    auto nptr = std::make_shared<Placeholder>(tensor, ctx);
-    graph.add_node(nptr, name);
-    nptr->forward();
-    return nptr;
+    // auto nptr = std::make_shared<Placeholder>(name, ty, ctx);
+    // graph.add_node(nptr, name);
+    // return nptr;
   }
 
   static NodePtr add(const std::string& name, NodePtr a, NodePtr b,
-                     Graph& graph, const Context& ctx)
+                     Graph& graph, Context& ctx)
   {
-    auto type = infer_type<Add>(a, b);
-    auto nptr = std::make_shared<Add>(a, b, type, ctx);
-    graph.add_node(nptr, name);
-    nptr->forward();
-    return nptr;
+    // auto type = infer_type<Add>(a, b);
+    // auto nptr = std::make_shared<Add>(name, a, b, type, ctx);
+    // graph.add_node(nptr, name);
+    // return nptr;
   }
 
   static NodePtr mul(const std::string& name, NodePtr a, NodePtr b,
-                     Graph& graph, const Context& ctx)
+                     Graph& graph, Context& ctx)
   {
-    auto type = infer_type<Mul>(a, b);
-    auto nptr = std::make_shared<Mul>(a, b, type, ctx);
-    graph.add_node(nptr, name);
-    nptr->forward();
-    return nptr;
+    // auto type = infer_type<Mul>(a, b);
+    // auto nptr = std::make_shared<Mul>(name, a, b, type, ctx);
+    // graph.add_node(nptr, name);
+    // return nptr;
   }
 };
 

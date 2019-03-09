@@ -24,12 +24,12 @@ int main(int argc, char const* argv[])
 
   Graph g;
 
-  auto p1 = F::placeholder("p1", t1, g, ctx);
-  auto p2 = F::placeholder("p2", t2, g, ctx);
+  auto p1 = F::placeholder("p1", ty, g, ctx);
+  auto p2 = F::placeholder("p2", ty, g, ctx);
   auto add = F::add("add1", p1, p2, g, ctx);
   auto mul = F::mul("mul1", add, p2, g, ctx);
 
-  // print(add->tensor());
+  print(add->tensor());
   print(mul->tensor());
 
   // auto v = new PrintVisitor();
