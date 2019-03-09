@@ -13,10 +13,11 @@
 namespace dnn {
 
 class Node;
-using NodePtr = std::shared_ptr<Node>;
+using NodePtr = Node*;
 using NodeVec = std::vector<NodePtr>;
-using TensorVec = std::vector<Tensor*>;
+using NodeArray = ArrayRef<NodePtr>;
 using TensorArray = ArrayRef<Tensor*>;
+using TensorVec = std::vector<Tensor*>;
 class Visitor;
 using VisitFunc = std::function<void(const Node*)>;
 
@@ -27,7 +28,9 @@ protected:
   NodeTy nodety_;
   Type ty_;
   Context* ctx_ = nullptr;
+  Tensor* tensor_ = nullptr;
   TensorVec in_tensors_ = {};
+  NodeVec inputs_ = {};
 
 public:
   friend class Backend;
@@ -39,45 +42,43 @@ public:
     alloc_tensor();
   }
 
-  // Node(const NodeTy nodety, NodeVec& in_tensors, const Type& ty, Context&
-  // ctx)
-  //   : Node(NameManager::MakeUnique(to_string(nodety)), nodety, in_tensors,
-  //   ty, ctx)
-  // {}
-
   virtual ~Node() = default;
 
   /// getter functions.
   inline NodeTy nodety() const { return nodety_; };
   inline const std::string& name() const { return name_; }
-  inline Tensor& tensor() { return *(ctx_->get_tensor(name_)); }
-  inline const Tensor& tensor() const { return *(ctx_->get_tensor(name_)); }
-  void set_tensor(Tensor& tensor) { return ctx_->set_tensor(name_, tensor); }
-
-  inline TensorVec& in_tensors() { return in_tensors_; }
-  inline Tensor* in_tensor(Index idx) { return in_tensors_[idx]; }
-  inline const TensorVec& in_tensors() const { return in_tensors_; }
-  inline const Tensor* in_tensor(Index idx) const { return in_tensors_[idx]; }
-
+  // inline Tensor* tensor() { return ctx_->get_tensor(this); }
+  // inline const Tensor* tensor() const { return ctx_->get_tensor(this); }
+  inline Tensor* tensor() { return tensor_; }
+  inline const Tensor* tensor() const { return tensor_; }
+  inline const Tensor* in_tensor(const Index idx) const
+  {
+    return in_tensors_[idx];
+  }
+  inline const NodeVec& inputs() const { return inputs_; }
+  inline const NodePtr input(const Index idx) const { return inputs_[idx]; }
   inline const Type& type() const { return ty_; }
-  inline DataTy dataty() const { return tensor().dataty(); }
-  inline Shape shape() const { return tensor().shape(); }
-  inline Index elems() const { return tensor().elems(); }
+  inline DataTy dataty() const { return tensor()->dataty(); }
+  inline Shape shape() const { return tensor()->shape(); }
+  inline Index elems() const { return tensor()->elems(); }
+  inline HostTy hostty() const { return ctx_->hostty(); }
+  inline DeviceTy devty() const { return ctx_->devty(); }
 
   /// setter functions.
   inline void set_name(const std::string& name) { name_ = name; }
 
-  inline HostTy hostty() const { return ctx_->hostty(); }
-  inline DeviceTy devty() const { return ctx_->devty(); }
-
-  virtual void forward(TensorArray inputs) = 0;
+  /// virtual functions.
+  virtual void forward() = 0;
   virtual void backward() = 0;
-
+  virtual Tensor* operator()(TensorArray tensors) = 0;
   virtual void accept(Visitor*) const = 0;
   virtual void accept(Visitor*, const VisitFunc&, const VisitFunc&) const = 0;
+  virtual Index num_inputs() = 0;
+  virtual void set_in_tensors(TensorArray tensors) = 0;
 
 private:
-  void alloc_tensor() { ctx_->alloc_tensor(name_, ty_); }
+  // void alloc_tensor() { ctx_->alloc_tensor(this); }
+  void alloc_tensor() { tensor_ = new Tensor(this); }
 };
 
 template <typename T>
@@ -85,32 +86,54 @@ class VisitableNode : public Node
 {
 public:
   using Node::Node;
-  virtual void forward(TensorArray inputs) = 0;
-  virtual void backward() = 0;
-  void accept(Visitor*) const;
-  void accept(Visitor*, const VisitFunc&, const VisitFunc&) const;
+  virtual void forward() override = 0;
+  virtual void backward() override = 0;
+  virtual Index num_inputs() override = 0;
+  void accept(Visitor*) const override;
+  void accept(Visitor*, const VisitFunc&, const VisitFunc&) const override;
+
+  Tensor* operator()(TensorArray tensors) override
+  {
+    set_in_tensors(tensors);
+    forward();
+    return tensor();
+  }
+
+  void set_in_tensors(TensorArray tensors) override
+  {
+    if (tensors.size() != num_inputs()) {
+      EXCEPTION_STR(
+        "the number of given tensors(" + std::to_string(tensors.size()) +
+        ") differs from the intended(" + std::to_string(num_inputs()) + ")")
+    }
+    std::vector<NodePtr> inputs(tensors.size());
+    for (size_t i = 0; i < tensors.size(); i++) {
+      inputs[i] = tensors[i]->owner();
+    }
+    in_tensors_ = tensors;
+    inputs_ = inputs;
+  }
 };
 
-#define DEFINE_BASIC_NODE_FUNCS(NAME)                           \
+#define DEFINE_BASIC_NODE_FUNCS(NAME, NUM_INPUTS)               \
   class NAME : public VisitableNode<NAME>                       \
   {                                                             \
   public:                                                       \
     NAME(const std::string& name, const Type& ty, Context& ctx) \
       : VisitableNode(name, NodeTy::NAME, ty, ctx)              \
     {}                                                          \
-    void forward(TensorArray inputs) override;                  \
+    void forward() override;                                    \
     void backward() override;                                   \
+    Index num_inputs() override { return NUM_INPUTS; }          \
   };
 
-DEFINE_BASIC_NODE_FUNCS(Placeholder)
-DEFINE_BASIC_NODE_FUNCS(Add)
-DEFINE_BASIC_NODE_FUNCS(Sub)
-DEFINE_BASIC_NODE_FUNCS(Mul)
-DEFINE_BASIC_NODE_FUNCS(Matmul)
+DEFINE_BASIC_NODE_FUNCS(Placeholder, 1)
+DEFINE_BASIC_NODE_FUNCS(Add, 2)
+DEFINE_BASIC_NODE_FUNCS(Sub, 2)
+DEFINE_BASIC_NODE_FUNCS(Mul, 2)
+DEFINE_BASIC_NODE_FUNCS(Matmul, 2)
 
 template <typename T>
-const Type& infer_type(TensorArray inputs);
-template <typename T>
-const Type& infer_type(TensorArray inputs);
+const Type& infer_type(const T& node);
 
 } // namespace dnn

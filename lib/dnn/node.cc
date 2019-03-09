@@ -7,12 +7,9 @@ namespace dnn {
 
 static Executor executor = Executor();
 
-#define DEF_NODE_FUNC(NAME)                  \
-  void NAME::forward(TensorArray in_tensors) \
-  {                                          \
-    in_tensors_ = in_tensors;                \
-    executor.dispatch_forward(*this);        \
-  } // namespace dnn
+#define DEF_NODE_FUNC(NAME)                                  \
+  void NAME::forward() { executor.dispatch_forward(*this); } \
+  void NAME::backward() {}
 
 DEF_NODE_FUNC(Placeholder)
 DEF_NODE_FUNC(Add)
@@ -21,24 +18,24 @@ DEF_NODE_FUNC(Mul)
 DEF_NODE_FUNC(Matmul)
 
 template <>
-const Type& infer_type<Add>(TensorArray inputs)
+const Type& infer_type(const Add& node)
 {
-  return inputs[0]->type();
+  return node.inputs()[0]->type();
 }
 template <>
-const Type& infer_type<Sub>(TensorArray inputs)
+const Type& infer_type(const Sub& node)
 {
-  return inputs[0]->type();
+  return node.inputs()[0]->type();
 }
 template <>
-const Type& infer_type<Mul>(TensorArray inputs)
+const Type& infer_type(const Mul& node)
 {
-  return inputs[0]->type();
+  return node.inputs()[0]->type();
 }
 template <>
-const Type& infer_type<Matmul>(TensorArray inputs)
+const Type& infer_type(const Matmul& node)
 {
-  return inputs[0]->type();
+  return node.inputs()[0]->type();
 }
 
 } // namespace dnn

@@ -1,6 +1,7 @@
 add_subdirectory(backend)
 
 add_library(dnn node.cc 
+                context.cc
                 graph.cc
                 visitor.cc
                 tensor/tensor.cc

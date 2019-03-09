@@ -11,9 +11,8 @@ namespace Generic {
 template <DataTy T>
 void forward(Placeholder& node)
 {
-  auto y = node.tensor().get_access<T>();
+  auto y = node.tensor()->get_access<T>();
   auto x = node.in_tensor(0)->get_access<T>();
-
   for (Index i = 0; i < node.elems(); ++i) { y[i] = x[i]; }
 }
 
@@ -23,7 +22,7 @@ void forward(Add& node)
 {
   auto a = node.in_tensor(0)->get_access<T>();
   auto b = node.in_tensor(1)->get_access<T>();
-  auto c = node.tensor().get_access<T>();
+  auto c = node.tensor()->get_access<T>();
   for (Index i = 0; i < node.elems(); ++i) { c[i] = a[i] + b[i]; }
 }
 
@@ -33,7 +32,7 @@ void forward(Sub& node)
 {
   auto a = node.in_tensor(0)->get_access<T>();
   auto b = node.in_tensor(1)->get_access<T>();
-  auto c = node.tensor().get_access<T>();
+  auto c = node.tensor()->get_access<T>();
   for (Index i = 0; i < node.elems(); ++i) { c[i] = a[i] - b[i]; }
 }
 
@@ -43,7 +42,7 @@ void forward(Mul& node)
 {
   auto a = node.in_tensor(0)->get_access<T>();
   auto b = node.in_tensor(1)->get_access<T>();
-  auto c = node.tensor().get_access<T>();
+  auto c = node.tensor()->get_access<T>();
   for (Index i = 0; i < node.elems(); ++i) { c[i] = a[i] * b[i]; }
 }
 
@@ -51,9 +50,9 @@ void forward(Mul& node)
 template <DataTy T>
 void forward(Matmul& node)
 {
-  // auto a = node.a()->tensor().get_access<T>();
-  // auto b = node.b()->tensor().get_access<T>();
-  // auto c = node.tensor().get_access<T>();
+  // auto a = node.a()->tensor()->get_access<T>();
+  // auto b = node.b()->tensor()->get_access<T>();
+  // auto c = node.tensor()->get_access<T>();
   // for (Index i = 0; i < node.elems(); ++i) { c[i] = a[i] * b[i]; }
 }
 

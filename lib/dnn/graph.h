@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <memory>
 #include "dnn/context.h"
 #include "dnn/node.h"
 #include "dnn/type.h"
@@ -21,7 +22,13 @@ public:
   Graph() = default;
   ~Graph() = default;
 
-  NodePtr add_node(const NodePtr& nptr, const std::string& name);
+  void add_node(NodePtr nptr, const std::string& name);
+  Node& placeholder(const std::string& name, const Type& ty, Graph& graph,
+                    Context& ctx);
+  Node& add(const std::string& name, const Type& ty, Graph& graph,
+            Context& ctx);
+  Node& mul(const std::string& name, const Type& ty, Graph& graph,
+            Context& ctx);
   Symbol get_unique_symbol();
 };
 

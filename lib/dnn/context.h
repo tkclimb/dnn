@@ -7,7 +7,7 @@
 namespace dnn {
 
 class Node;
-using NodePtr = std::shared_ptr<Node>;
+using NodePtr = Node*;
 
 class Context final
 {
@@ -27,30 +27,9 @@ public:
   inline HostTy hostty() const { return hostty_; }
   inline DeviceTy devty() const { return device_; }
 
-  Tensor* alloc_tensor(const std::string& name, const Type& ty)
-  {
-    if (tensor_map_.count(name)) {
-      EXCEPTION_STR("tensor(" + name +
-                    ") is already allocated in this context...");
-    } else {
-      tensor_map_.emplace(name, new Tensor(ty));
-    }
-    return tensor_map_[name];
-  }
-
-  Tensor* get_tensor(const std::string& name)
-  {
-    if (!tensor_map_.count(name)) {
-      EXCEPTION_STR("tensor(" + name +
-                    ") is not allocated in this context yet...");
-    }
-    return tensor_map_[name];
-  }
-
-  void set_tensor(const std::string& name, Tensor& tensor)
-  {
-    tensor_map_[name] = &tensor;
-  }
+  Tensor* alloc_tensor(Node* node);
+  Tensor* get_tensor(Node* node);
+  const Tensor* get_tensor(const Node* node);
 
   // static Context CPU() { return Context(HostTy::CPU, DeviceTy::Generic); }
   // static Context GPU() { return Context(HostTy::GPU, DeviceTy::Geforce); }

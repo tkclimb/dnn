@@ -25,6 +25,8 @@ namespace dnn {
 template <typename T>
 class TensorAccessor;
 
+class Node;
+
 /**
  * @brief This class represents tensor structure. In fact this class just
  * contains essential information only like shape, name and format. This
@@ -43,6 +45,7 @@ private:
   std::string name_;
 
   /// Owner node of this tensor
+  Node* owner_ = nullptr;
 
   /// Type of tensor's data.
   Type type_;
@@ -61,18 +64,20 @@ public:
   Tensor(const Tensor&&) = delete;
 
   /// Create a scalar with value 0 without any given name
-  Tensor() : name_{NameManager::MakeUnique("Tensor")}, type_{} {};
+  Tensor() : name_{NameManager::MakeUnique("tensor")}, type_{} {};
+
+  explicit Tensor(Node* node);
 
   /// Create a scalar with the given type
   explicit Tensor(const Type type)
-    : name_{NameManager::MakeUnique("Tensor")}, type_{type} {};
+    : name_{NameManager::MakeUnique("tensor")}, type_{type} {};
 
   /// Create a scalar with 0 and the given name
   explicit Tensor(const std::string& name) : name_{name}, type_{} {}
 
   /// Create a tensor with the given shape
   explicit Tensor(DataTy dataty, ArrayRef<Index> shape)
-    : name_{NameManager::MakeUnique("Tensor")}, type_{dataty, shape} {};
+    : name_{NameManager::MakeUnique("tensor")}, type_{dataty, shape} {};
 
   /// Create a tensor with the given name, dataty and shape.
   explicit Tensor(const std::string& name, const DataTy dataty,
@@ -81,6 +86,9 @@ public:
 
   /// Get the name of this tensor.
   inline const std::string& name() const { return name_; }
+
+  /// Get the owner of this tensor.
+  inline Node* owner() { return owner_; }
 
   /// Get the type of this tensor.
   inline const Type& type() const { return type_; }

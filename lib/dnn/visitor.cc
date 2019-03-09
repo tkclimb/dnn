@@ -24,22 +24,16 @@ namespace dnn {
   void Visitor::visit(const NAME *) {} \
   void Visitor::visit(const NAME *, const VisitFunc &, const VisitFunc &) {}
 
-#define DEF_VISITABLE_BINARY_OP_NODE(NAME)                             \
-  DEF_VISITABLE_NODE(NAME)                                             \
-  void Visitor::visit(const NAME *x)                                   \
-  {                                                                    \
-    if (x->in_tensors().size() != 2) {                                 \
-      EXCEPTION_STR("node(" + x->name() + ") doesn't initialized..."); \
-    }                                                                  \
-    /* for (auto &x : x.in_tensors()) { x.accept(this); } */           \
-  }                                                                    \
-  void Visitor::visit(const NAME *x, const VisitFunc &f_pre,           \
-                      const VisitFunc &f_post)                         \
-  {                                                                    \
-    if (x->in_tensors().size() != 2) {                                 \
-      EXCEPTION_STR("node(" + x->name() + ") doesn't initialized..."); \
-    }                                                                  \
-    /* for (auto &next_node : x->inputs_) { x.accept(this); } */       \
+#define DEF_VISITABLE_BINARY_OP_NODE(NAME)                   \
+  DEF_VISITABLE_NODE(NAME)                                   \
+  void Visitor::visit(const NAME *x)                         \
+  {                                                          \
+    /* for (auto &i : x->inputs()) { i.accept(this); } */    \
+  }                                                          \
+  void Visitor::visit(const NAME *x, const VisitFunc &f_pre, \
+                      const VisitFunc &f_post)               \
+  {                                                          \
+    /* for (auto &i : x->inputs()) { i.accept(this); }  */   \
   }
 
 #define DEF_VISIT_PRE_AND_POST(NAME)                                   \

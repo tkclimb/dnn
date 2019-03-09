@@ -5,19 +5,41 @@
 
 namespace dnn {
 
-NodePtr Graph::add_node(const NodePtr& nptr, const std::string& name)
+void Graph::add_node(NodePtr nptr, const std::string& name)
 {
   nptr->set_name(name);
-  auto unique_name = nptr->name();
 
-  if (symbol_map_.count(unique_name)) {
-    EXCEPTION_STR("node(" + unique_name + ") already exists in this graph...");
+  if (symbol_map_.count(name)) {
+    EXCEPTION_STR("node(" + name + ") already exists in this graph...");
   } else {
     auto sym = get_unique_symbol();
     node_map_[sym] = nptr;
-    symbol_map_[unique_name] = sym;
+    symbol_map_[name] = sym;
   }
-  return nptr;
+}
+
+Node& Graph::placeholder(const std::string& name, const Type& ty, Graph& graph,
+                         Context& ctx)
+{
+  auto nptr = new Placeholder(name, ty, ctx);
+  graph.add_node(nptr, name);
+  return *nptr;
+}
+
+Node& Graph::add(const std::string& name, const Type& ty, Graph& graph,
+                 Context& ctx)
+{
+  auto nptr = new Add(name, ty, ctx);
+  graph.add_node(nptr, name);
+  return *nptr;
+}
+
+Node& Graph::mul(const std::string& name, const Type& ty, Graph& graph,
+                 Context& ctx)
+{
+  auto nptr = new Mul(name, ty, ctx);
+  graph.add_node(nptr, name);
+  return *nptr;
 }
 
 Graph::Symbol Graph::get_unique_symbol()
