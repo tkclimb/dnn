@@ -26,8 +26,8 @@ int main(int argc, char const* argv[])
 
   Graph g;
 
-  auto& add = g.add("add1", ty, g, ctx);
-  auto& mul = g.mul("mul1", ty, g, ctx);
+  auto& add = g.add("add1", ty, ctx);
+  auto& mul = g.mul("mul1", ty, ctx);
 
   auto add_t = add({t1, t2});
   auto mul_t = mul({add_t, t3});

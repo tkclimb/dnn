@@ -5,48 +5,75 @@
 
 namespace dnn {
 
-void Graph::add_node(NodePtr nptr, const std::string& name)
+void Graph::add_node(const NodePtr node, const Symbol& sym)
 {
-  nptr->set_name(name);
-
-  if (symbol_map_.count(name)) {
-    EXCEPTION_STR("node(" + name + ") already exists in this graph...");
+  node->set_name(sym);
+  if (node_map_.count(sym)) {
+    EXCEPTION_STR("node(" + sym + ") already exists in this graph...");
   } else {
-    auto sym = get_unique_symbol();
-    node_map_[sym] = nptr;
-    symbol_map_[name] = sym;
+    // auto sym = get_unique_symbol();
+    node_map_[sym] = const_cast<NodePtr>(node);
+    link_map_[sym] = {}; /// initialize the link with empty vector
   }
 }
 
-Node& Graph::placeholder(const std::string& name, const Type& ty, Graph& graph,
-                         Context& ctx)
+void Graph::add_link(NodePtr child_node, NodePtr paren_node)
 {
-  auto nptr = new Placeholder(name, ty, ctx);
-  graph.add_node(nptr, name);
-  return *nptr;
+  const auto& child_sym = child_node->name();
+  const auto& paren_sym = paren_node->name();
+  if (!node_map_.count(child_sym)) {
+    EXCEPTION_STR("node(" + child_sym + ") doesn't exist in this graph...");
+  } else if (!node_map_.count(paren_sym)) {
+    EXCEPTION_STR("node(" + paren_sym + ") doesn't exist in this graph...");
+  } else {
+    link_map_[child_sym].push_back(paren_node);
+  }
 }
 
-Node& Graph::add(const std::string& name, const Type& ty, Graph& graph,
-                 Context& ctx)
+const NodeVec& Graph::get_paren_nodes(const NodePtr child_node)
 {
-  auto nptr = new Add(name, ty, ctx);
-  graph.add_node(nptr, name);
-  return *nptr;
+  auto child_sym = child_node->name();
+  if (!link_map_.count(child_sym)) {
+    EXCEPTION_STR("node(" + child_sym +
+                  ") doesn't connect to any parent nodes...");
+  } else {
+    return link_map_[child_sym];
+  }
+  // auto paren_sym = paren_syms[idx];
+  // if (!node_map_.count(paren_sym)) {
+  //   EXCEPTION_STR("node(" + paren_sym + ") doesn't exist in this
+  //   graph...");
+  // } else {
+  //   return node_map_[paren_sym];
+  // }
 }
 
-Node& Graph::mul(const std::string& name, const Type& ty, Graph& graph,
-                 Context& ctx)
+Node& Graph::placeholder(const std::string& sym, const Type& ty, Context& ctx)
 {
-  auto nptr = new Mul(name, ty, ctx);
-  graph.add_node(nptr, name);
-  return *nptr;
+  auto node = new Placeholder(sym, ty, *this, ctx);
+  add_node(node, sym);
+  return *node;
 }
 
-Graph::Symbol Graph::get_unique_symbol()
+Node& Graph::add(const std::string& sym, const Type& ty, Context& ctx)
 {
-  auto current_id = num_nodes_;
-  ++num_nodes_;
-  return current_id;
+  auto node = new Add(sym, ty, *this, ctx);
+  add_node(node, sym);
+  return *node;
 }
+
+Node& Graph::mul(const std::string& sym, const Type& ty, Context& ctx)
+{
+  auto node = new Mul(sym, ty, *this, ctx);
+  add_node(node, sym);
+  return *node;
+}
+
+// Graph::Symbol Graph::get_unique_symbol()
+// {
+//   auto current_id = num_nodes_;
+//   ++num_nodes_;
+//   return current_id;
+// }
 
 } // namespace dnn

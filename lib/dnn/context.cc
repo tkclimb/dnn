@@ -1,5 +1,7 @@
 #include "dnn/context.h"
+#include "dnn/arrayref.h"
 #include "dnn/node.h"
+#include "dnn/tensor/tensor.h"
 
 namespace dnn {
 
@@ -39,6 +41,22 @@ Tensor* Context::get_tensor(Node* node)
 const Tensor* Context::get_tensor(const Node* node)
 {
   return get_tensor(const_cast<Node*>(node));
+}
+
+const Tensor* Context::assign_in_tensor(const Node* node, const Tensor* tensor)
+{
+  auto& name = node->name();
+  in_tensor_map_[name].push_back(tensor);
+  return tensor;
+}
+
+const Tensor* Context::get_in_tensor(const Node* node, const Index idx)
+{
+  auto& name = node->name();
+  if (!in_tensor_map_.count(name)) {
+    EXCEPTION_STR("tensor(" + name + ") is not allocated as in-tensor...");
+  }
+  return in_tensor_map_[name][idx];
 }
 
 } // namespace dnn
