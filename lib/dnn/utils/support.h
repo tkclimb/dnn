@@ -8,7 +8,7 @@ enum class NodeTy : std::uint32_t;
 enum class HostTy : std::uint32_t;
 enum class DeviceTy : std::uint32_t;
 
-/// to_string
+/// define to_string
 #define TO_STRING(T) to_string(T);
 
 std::string to_string(const DataTy& dataty);

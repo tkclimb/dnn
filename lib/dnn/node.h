@@ -95,7 +95,7 @@ public:
   Tensor* operator()(TensorArray tensors) override
   {
     set_in_tensors(tensors);
-    forward();
+    forward(); /// must call forward after set input tensors
     return tensor();
   }
 
@@ -106,9 +106,12 @@ public:
         "the number of given tensors(" + std::to_string(tensors.size()) +
         ") differs from the intended(" + std::to_string(num_inputs()) + ")")
     }
-    std::vector<NodePtr> inputs(tensors.size());
+    std::vector<NodePtr> inputs;
     for (size_t i = 0; i < tensors.size(); i++) {
-      inputs[i] = tensors[i]->owner();
+      auto x = tensors[i]->owner();
+      if (x != nullptr) {
+        inputs.push_back(x);
+      }
     }
     in_tensors_ = tensors;
     inputs_ = inputs;

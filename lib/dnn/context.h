@@ -27,9 +27,10 @@ public:
   inline HostTy hostty() const { return hostty_; }
   inline DeviceTy devty() const { return device_; }
 
-  Tensor* alloc_tensor(Node* node);
-  Tensor* get_tensor(Node* node);
-  const Tensor* get_tensor(const Node* node);
+  Tensor* alloc_tensor(const std::string&, const Type&);
+  Tensor* alloc_tensor(Node*);
+  Tensor* get_tensor(Node*);
+  const Tensor* get_tensor(const Node*);
 
   // static Context CPU() { return Context(HostTy::CPU, DeviceTy::Generic); }
   // static Context GPU() { return Context(HostTy::GPU, DeviceTy::Geforce); }

@@ -3,6 +3,17 @@
 
 namespace dnn {
 
+Tensor* Context::alloc_tensor(const std::string& name, const Type& ty)
+{
+  if (tensor_map_.count(name)) {
+    EXCEPTION_STR("tensor(" + name +
+                  ") is already allocated in this context...");
+  } else {
+    tensor_map_.emplace(name, new Tensor(name, ty));
+  }
+  return tensor_map_[name];
+}
+
 Tensor* Context::alloc_tensor(Node* node)
 {
   auto& name = node->name();

@@ -24,8 +24,8 @@ namespace dnn {
 
 template <typename T>
 class TensorAccessor;
-
 class Node;
+class Context;
 
 /**
  * @brief This class represents tensor structure. In fact this class just
@@ -69,11 +69,16 @@ public:
   explicit Tensor(Node* node);
 
   /// Create a scalar with the given type
-  explicit Tensor(const Type type)
-    : name_{NameManager::MakeUnique("tensor")}, type_{type} {};
+  explicit Tensor(const Type ty)
+    : name_{NameManager::MakeUnique("tensor")}, type_{ty} {};
 
   /// Create a scalar with 0 and the given name
   explicit Tensor(const std::string& name) : name_{name}, type_{} {}
+
+  /// Create a tensor with the given name and type
+  explicit Tensor(const std::string& name, const Type ty)
+    : name_{name}, type_{ty}
+  {}
 
   /// Create a tensor with the given shape
   explicit Tensor(DataTy dataty, ArrayRef<Index> shape)
@@ -141,6 +146,8 @@ auto Tensor::get_access() const&
     EXCEPTION("The given type differs from the type intended...");
   }
 };
+
+Tensor* make_tensor(const std::string& name, const Type& ty, Context& ctx);
 
 } // namespace dnn
 

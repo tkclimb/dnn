@@ -152,8 +152,10 @@ private:
 
   void validate_num_elems(ArrayRef<T> data)
   {
-    ASSERT(data.size() == elems(),
-           "The given data size differs from the expected...");
+    ASSERT_STR(data.size() == elems(), "The given data size(" +
+                                         std::to_string(data.size()) +
+                                         ") differs from the expected(" +
+                                         std::to_string(elems()) + ")...");
   }
 
   /// Derive each extent, which would be used in ctor.
