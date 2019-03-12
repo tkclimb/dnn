@@ -47,7 +47,7 @@ public:
   {
     return ctx_->get_in_tensor(this, idx);
   }
-  const NodeVec& inputs() const;
+  const NodeVec& parent_nodes() const;
   const NodePtr input(const Index idx) const;
   inline const Type& type() const { return ty_; }
   inline NodeTy nodety() const { return nodety_; };

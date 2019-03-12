@@ -19,16 +19,16 @@ namespace dnn {
     v->visit_post((const NAME *)this, f_post);                         \
   }
 
-#define DEF_VISIT(NAME)                                             \
-  DEF_VISITABLE_NODE(NAME)                                          \
-  void Visitor::visit(const NAME *x)                                \
-  {                                                                 \
-    for (auto &i : x->inputs()) { i->accept(this); }                \
-  }                                                                 \
-  void Visitor::visit(const NAME *x, const VisitFunc &f_pre,        \
-                      const VisitFunc &f_post)                      \
-  {                                                                 \
-    for (auto &i : x->inputs()) { i->accept(this, f_pre, f_post); } \
+#define DEF_VISIT(NAME)                                                   \
+  DEF_VISITABLE_NODE(NAME)                                                \
+  void Visitor::visit(const NAME *x)                                      \
+  {                                                                       \
+    for (auto &i : x->parent_nodes()) { i->accept(this); }                \
+  }                                                                       \
+  void Visitor::visit(const NAME *x, const VisitFunc &f_pre,              \
+                      const VisitFunc &f_post)                            \
+  {                                                                       \
+    for (auto &i : x->parent_nodes()) { i->accept(this, f_pre, f_post); } \
   }
 
 #define DEF_VISIT_PRE_AND_POST(NAME)                                   \

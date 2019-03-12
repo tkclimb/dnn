@@ -30,7 +30,7 @@ void Graph::add_link(NodePtr child_node, NodePtr paren_node)
   }
 }
 
-const NodeVec& Graph::get_paren_nodes(const NodePtr child_node)
+const NodeVec& Graph::get_parent_nodes(const NodePtr child_node)
 {
   auto child_sym = child_node->name();
   if (!link_map_.count(child_sym)) {

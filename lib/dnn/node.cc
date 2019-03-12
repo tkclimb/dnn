@@ -15,14 +15,14 @@ Node::Node(const std::string& name, const NodeTy nodety, const Type& ty,
   alloc_tensor();
 }
 
-const NodeVec& Node::inputs() const
+const NodeVec& Node::parent_nodes() const
 {
-  return graph_->get_paren_nodes(const_cast<const NodePtr>(this));
+  return graph_->get_parent_nodes(const_cast<const NodePtr>(this));
 }
 
 const NodePtr Node::input(const Index idx) const
 {
-  auto& inputs_ = inputs();
+  auto& inputs_ = parent_nodes();
   if (inputs_.size() <= idx) {
     EXCEPTION_STR("node(" + name() + ") have only " +
                   std::to_string(inputs_.size()) + " parent nodes, not " +
@@ -60,22 +60,22 @@ DEF_NODE_FUNC(Matmul)
 template <>
 const Type& infer_type(const Add& node)
 {
-  return node.inputs()[0]->type();
+  return node.parent_nodes()[0]->type();
 }
 template <>
 const Type& infer_type(const Sub& node)
 {
-  return node.inputs()[0]->type();
+  return node.parent_nodes()[0]->type();
 }
 template <>
 const Type& infer_type(const Mul& node)
 {
-  return node.inputs()[0]->type();
+  return node.parent_nodes()[0]->type();
 }
 template <>
 const Type& infer_type(const Matmul& node)
 {
-  return node.inputs()[0]->type();
+  return node.parent_nodes()[0]->type();
 }
 
 } // namespace dnn

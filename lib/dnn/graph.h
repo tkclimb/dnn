@@ -28,7 +28,7 @@ public:
 
   void add_node(const NodePtr, const Symbol&);
   void add_link(const NodePtr, const NodePtr);
-  const NodeVec& get_paren_nodes(const NodePtr);
+  const NodeVec& get_parent_nodes(const NodePtr);
   Node& placeholder(const std::string&, const Type&, Context&);
   Node& add(const Symbol&, const Type&, Context&);
   Node& mul(const Symbol&, const Type&, Context&);
